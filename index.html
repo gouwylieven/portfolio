@@ -9,7 +9,7 @@
 <link rel="preload" as="image" href="Texts/ConctactWhite.webp">
 <link rel="preload" as="image" href="Texts/Asan.webp">
 <link rel="preload" as="image" href="Texts/mail-insta-linkedrecolor.webp">
-<link rel="preload" as="image" href="Texts/Port.webp">
+<link rel="preload" as="image" href="Texts/Drive.webp">
 <link rel="preload" as="image" href="Texts/Congrats.webp">
 <link rel="preload" as="image" href="Texts/HowManySeconds.webp">
 <link rel="preload" as="image" href="Texts/Signup.webp">
@@ -108,13 +108,61 @@
     opacity: 0.95;
   }
 
-  /* Port — visible with the projects toggle. Same box as Asan. */
-  .port {
+  /* Drive — visible with the projects toggle. Same middle point as
+     Asan (1330, 519): the Asan box (847, 143, 966x752) scaled by 0.7.
+     object-fit: contain keeps Drive's own aspect and centers it. */
+  .drive {
     position: absolute;
+    top: 236px;
+    left: 992px;
+    width: 676px;
+    height: 526px;
+    object-fit: contain;
+    display: none;
+  }
+
+  /* Drive tagline — same font/settings as the stepcounter, visible
+     with the projects toggle. Ink left/right aligned with the Drive
+     edges: the layout box is 966 wide at left 702 and the
+     0.7 scaleX (origin right) compresses the ink to exactly 676.
+     Top-anchored level with the about button top (y=143);
+     wraps over several lines. */
+  .drive-text {
+    position: absolute;
+    left: 702px;
     top: 143px;
-    left: 847px;
     width: 966px;
-    height: 752px;
+    font-family: 'Microsoft Yi Baiti', sans-serif;
+    font-weight: 400;
+    font-size: 33px;
+    line-height: 30px;
+    letter-spacing: 2px;
+    color: #8a7e73;
+    text-align: justify;
+    text-align-last: left;
+    transform: scaleX(0.7);
+    transform-origin: 100% 0;
+    display: none;
+  }
+
+  /* Drive description — same font/settings as the tagline, visible
+     with the projects toggle. Top-anchored at y=732; ink left/right
+     aligned with the Drive edges the same way as the tagline. */
+  .drive-desc {
+    position: absolute;
+    left: 702px;
+    top: 732px;
+    width: 966px;
+    font-family: 'Microsoft Yi Baiti', sans-serif;
+    font-weight: 400;
+    font-size: 33px;
+    line-height: 30px;
+    letter-spacing: 2px;
+    color: #8a7e73;
+    text-align: justify;
+    text-align-last: left;
+    transform: scaleX(0.7);
+    transform-origin: 100% 0;
     display: none;
   }
 
@@ -137,9 +185,9 @@
     height: 112.5px;
     width: auto;
   }
-  /* Contact icons act as 3 buttons over the single recolor image:
-     left third = mail, middle third = instagram, right third =
-     LinkedIn. Transparent overlays so the artwork stays untouched. */
+  /* Contact icons act as 4 buttons over the single recolor image:
+     left to right = mail, instagram, LinkedIn, Discord.
+     Transparent overlays so the artwork stays untouched. */
   .links-inner {
     position: relative;
     display: inline-block;
@@ -149,7 +197,7 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 33.333%;
+    width: 25%;
     background: transparent;
     border: none;
     padding: 0;
@@ -157,8 +205,9 @@
   }
   a.link-btn { display: block; }
   .link-btn.mail { left: 0; }
-  .link-btn.insta { left: 33.333%; }
-  .link-btn.linked { left: 66.666%; }
+  .link-btn.insta { left: 25%; }
+  .link-btn.linked { left: 50%; }
+  .link-btn.discord { left: 75%; }
 
   /* WalkingLine — exported PNG, stretched to cover the zone
      (x 114..1813, y 900..1014) */
@@ -368,8 +417,10 @@
     </div>
     <img class="walkingline" src="Texts/WalkingLine.webp" alt="">
     <img class="asan" src="Texts/Asan.webp" alt="Asan">
-    <img class="port" src="Texts/Port.webp" alt="Port">
-    <div class="links"><div class="links-inner"><img src="Texts/mail-insta-linkedrecolor.webp" alt="Mail, Instagram, LinkedIn"><a class="link-btn mail" href="mailto:gouwylieven@yahoo.com" aria-label="Email"></a><a class="link-btn insta" href="https://instagram.com/gouwylieven" target="_blank" rel="noopener" aria-label="Instagram"></a><a class="link-btn linked" href="https://www.linkedin.com/in/lieven-gouwy-43342138b/" target="_blank" rel="noopener" aria-label="LinkedIn"></a></div></div>
+    <img class="drive" src="Texts/Drive.webp" alt="Drive">
+    <div class="drive-text">What if, on your 18th birthday, your grandmother who you have been living with since you were 8, tells you there is more to the passing of your parents than what you were previously told to believe?</div>
+    <div class="drive-desc">DRIVE is an android 2D a-synchronous competition car collecting game developed in Unity. Centered on deep gameplay and an evolving ever expanding world where systems are interconnected and all actions have consequences. Play anywhere on earth. Every street name, town, and city layout is an exact match to the real world.</div>
+    <div class="links"><div class="links-inner"><img src="Texts/mail-insta-linkedrecolor.webp" alt="Mail, Instagram, LinkedIn, Discord"><a class="link-btn mail" href="mailto:gouwylieven@yahoo.com" aria-label="Email"></a><a class="link-btn insta" href="https://instagram.com/gouwylieven" target="_blank" rel="noopener" aria-label="Instagram"></a><a class="link-btn linked" href="https://www.linkedin.com/in/lieven-gouwy-43342138b/" target="_blank" rel="noopener" aria-label="LinkedIn"></a><a class="link-btn discord" href="https://discord.gg/ZEFcwcfq6A" target="_blank" rel="noopener" aria-label="Discord"></a></div></div>
     <img class="congrats" src="Texts/Congrats.webp" alt="Congrats">
     <img class="signup" src="Texts/Signup.webp" alt="Signup">
     <img class="howmany" src="Texts/HowManySeconds.webp" alt="How many seconds do you think it will take Rudy to cross the screen">
@@ -624,7 +675,9 @@
   const projectsWord = document.querySelector('.word.projects');
   const contactWord = document.querySelector('.word.contact');
   const asan = document.querySelector('.asan');
-  const port = document.querySelector('.port');
+  const drive = document.querySelector('.drive');
+  const driveText = document.querySelector('.drive-text');
+  const driveDesc = document.querySelector('.drive-desc');
   const links = document.querySelector('.links');
   words.forEach(word => {
     word.addEventListener('click', () => {
@@ -632,7 +685,9 @@
       words.forEach(w => w.classList.remove('active'));
       if (!wasActive) word.classList.add('active');
       asan.style.display = aboutWord.classList.contains('active') ? 'block' : 'none';
-      port.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
+      drive.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
+      driveText.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
+      driveDesc.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
       quoteEl.style.display = contactWord.classList.contains('active') ? 'block' : 'none';
       links.style.display = contactWord.classList.contains('active') ? 'flex' : 'none';
     });
