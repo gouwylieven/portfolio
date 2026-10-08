@@ -10,6 +10,11 @@
 <link rel="preload" as="image" href="Texts/Asan.webp">
 <link rel="preload" as="image" href="Texts/mail-insta-linkedrecolor.webp">
 <link rel="preload" as="image" href="Texts/Drive.webp">
+<link rel="preload" as="image" href="Texts/PointNude.webp">
+<link rel="preload" as="image" href="Texts/ToLeft.webp">
+<link rel="preload" as="image" href="Texts/ToRight.webp">
+<link rel="preload" as="image" href="Texts/ecocivgreen.webp">
+<link rel="preload" as="image" href="Texts/DeadCertGP.webp">
 <link rel="preload" as="image" href="Texts/Congrats.webp">
 <link rel="preload" as="image" href="Texts/HowManySeconds.webp">
 <link rel="preload" as="image" href="Texts/Signup.webp">
@@ -121,13 +126,153 @@
     display: none;
   }
 
-  /* Drive tagline — same font/settings as the stepcounter, visible
-     with the projects toggle. Ink left/right aligned with the Drive
-     edges: the layout box is 966 wide at left 702 and the
-     0.7 scaleX (origin right) compresses the ink to exactly 676.
-     Top-anchored level with the about button top (y=143);
-     wraps over several lines. */
-  .drive-text {
+  /* PointNude — overlay sitting on top of the nude dot baked into
+     the Drive artwork (middle phone, right of "DRIVE").
+     Drive source is 905x609, shown contained in the 676x526 box,
+     so the rendered art is 676x455 centered vertically;
+     the dot's source centroid (~510, ~161) lands at ~(1373, 391).
+     34.6 px sits on the baked dot; spins clockwise in place. */
+  .pointnude {
+    position: absolute;
+    left: 1355.7px;
+    top: 372.7px;
+    width: 34.6px;
+    height: 34.6px;
+    object-fit: contain;
+    display: none;
+    animation: pointnude-spin 4s linear infinite;
+  }
+
+  @keyframes pointnude-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ToLeft / ToRight — chevron arrows flanking the Drive art,
+     visible with the projects toggle. 25 px gap from the Drive
+     box (992..1668): ToLeft right edge at 967, ToRight left edge
+     at 1693. Top/bottom aligned with the Projects button
+     (394..640). */
+  .toleft {
+    position: absolute;
+    top: 394px;
+    left: 901px;
+    width: 66px;
+    height: 246px;
+    display: none;
+    cursor: pointer;
+  }
+  .toright {
+    position: absolute;
+    top: 394px;
+    left: 1693px;
+    width: 66px;
+    height: 246px;
+    display: none;
+    cursor: pointer;
+  }
+
+  /* Ecocivgreen — second projects view, same width/box as Drive
+     (676x526 at left 992, object-fit: contain). JS sets its top so
+     the rendered art sits in the middle of the gap between the
+     bottom of the eco top text and the top of the eco bottom
+     text (y=732). Shown when ToRight is clicked; Drive and its
+     texts hide. Arrows stay. */
+  .eco {
+    position: absolute;
+    top: 236px;
+    left: 992px;
+    width: 676px;
+    height: 526px;
+    object-fit: contain;
+    display: none;
+  }
+
+  /* DeadCert — third projects view, same box as Drive/Eco.
+     The base art (with its orange word grade) stays untouched;
+     .names-mask is transparent and clipped to the baked word mask
+     so the scrolling season lines show through the word shapes
+     over the original colors. Mask and art share the same
+     box/contain geometry so they align. JS sets both
+     tops so the rendered art sits in the middle of the gap
+     between the bottom of the deadcert top text and the top of
+     the deadcert bottom text (y=732). */
+  .deadcert {
+    position: absolute;
+    top: 236px;
+    left: 992px;
+    width: 676px;
+    height: 526px;
+    object-fit: contain;
+    display: none;
+  }
+  .names-mask {
+    position: absolute;
+    top: 236px;
+    left: 992px;
+    width: 676px;
+    height: 526px;
+    background: transparent;
+    overflow: hidden;
+    display: none;
+    -webkit-mask-image: url("data:image/png;base64,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");
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-mode: luminance;
+    mask-image: url("data:image/png;base64,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");
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-mode: luminance;
+  }
+  /* One scrolling season line per year (JS distributes them
+     across the word band, ~4.38 px pitch for 8 px glyphs). Each
+     track crosses once from offscreen-right to offscreen-left and
+     stays gone (fill both, single iteration). Speed via inline
+     animation-duration, random 10-60 px/s per line; a backwards
+     fill plus positive delay staggers each line's entrance. */
+  .names-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    font-family: 'Microsoft Yi Baiti', sans-serif;
+    font-size: 8px;
+    line-height: 6px;
+    color: #fff;
+    white-space: nowrap;
+  }
+  .names-track {
+    display: inline-block;
+    white-space: nowrap;
+    animation: names-scroll linear both;
+  }
+
+  @keyframes names-scroll {
+    from { transform: translateX(676px); }
+    to   { transform: translateX(-100%); }
+  }
+
+  /* PointNude shadow — same-sized black circle underneath,
+     90% transparent, offset 3 px right and 3 px down. Static. */
+  .pointnude-shadow {
+    position: absolute;
+    left: 1358.7px;
+    top: 375.7px;
+    width: 34.6px;
+    height: 34.6px;
+    border-radius: 50%;
+    background: #000;
+    opacity: 0.15;
+    display: none;
+  }
+
+  /* Drive / Ecociv / DeadCert tagline — same font/settings as the stepcounter, visible
+      with the projects toggle. Ink left/right aligned with the Drive
+      edges: the layout box is 966 wide at left 702 and the
+      0.7 scaleX (origin right) compresses the ink to exactly 676.
+      Top-anchored level with the about button top (y=143);
+      wraps over several lines. */
+  .drive-text, .eco-text, .deadcert-text {
     position: absolute;
     left: 702px;
     top: 143px;
@@ -137,7 +282,8 @@
     font-size: 33px;
     line-height: 30px;
     letter-spacing: 2px;
-    color: #8a7e73;
+    color: #ffffff;
+    opacity: 0.8;
     text-align: justify;
     text-align-last: left;
     transform: scaleX(0.7);
@@ -145,10 +291,10 @@
     display: none;
   }
 
-  /* Drive description — same font/settings as the tagline, visible
-     with the projects toggle. Top-anchored at y=732; ink left/right
-     aligned with the Drive edges the same way as the tagline. */
-  .drive-desc {
+  /* Drive / Ecociv / DeadCert description — same font/settings as the tagline, visible
+      with the projects toggle. Top-anchored at y=732; ink left/right
+      aligned with the Drive edges the same way as the tagline. */
+  .drive-desc, .eco-desc, .deadcert-desc {
     position: absolute;
     left: 702px;
     top: 732px;
@@ -158,7 +304,8 @@
     font-size: 33px;
     line-height: 30px;
     letter-spacing: 2px;
-    color: #8a7e73;
+    color: #ffffff;
+    opacity: 0.8;
     text-align: justify;
     text-align-last: left;
     transform: scaleX(0.7);
@@ -249,7 +396,8 @@
     font-size: 30px;
     line-height: 18px;
     letter-spacing: 2px;
-    color: #8a7e73;
+    color: rgba(96, 87, 80, 0.2);
+    -webkit-text-stroke: 1px rgba(96, 87, 80, 0.8);
     text-align: right;
     white-space: nowrap;
     transform: scaleX(0.7);
@@ -275,12 +423,41 @@
     font-size: 30px;
     line-height: 18px;
     letter-spacing: 2px;
-    color: #8a7e73;
+    color: rgba(96, 87, 80, 0.2);
+    -webkit-text-stroke: 1px rgba(96, 87, 80, 0.8);
     text-align: right;
     white-space: nowrap;
     transform: scaleX(0.5964);
     transform-origin: 100% 0;
     display: none;
+  }
+
+  /* White readability layers over the drive/contact texts.
+     Same box/font/transform as the base — play with opacity. */
+  .drive-text-white,
+  .drive-desc-white,
+  .eco-text-white,
+  .eco-desc-white,
+  .deadcert-text-white,
+  .deadcert-desc-white,
+  .quote-white,
+  .steps-white {
+    color: #ffffff;
+    -webkit-text-stroke: 0;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* Project white twins parked at 0 while their base layers run at
+     0.8 — otherwise the 0.4 overlays would dominate and the text
+     would read ~88% instead of 80%. Raise to add glow. */
+  .drive-text-white,
+  .drive-desc-white,
+  .eco-text-white,
+  .eco-desc-white,
+  .deadcert-text-white,
+  .deadcert-desc-white {
+    opacity: 0;
   }
 
   /* HowManySeconds — shown after 4 s while the loop is paused.
@@ -418,8 +595,29 @@
     <img class="walkingline" src="Texts/WalkingLine.webp" alt="">
     <img class="asan" src="Texts/Asan.webp" alt="Asan">
     <img class="drive" src="Texts/Drive.webp" alt="Drive">
+    <div class="pointnude-shadow"></div>
+    <img class="pointnude" src="Texts/PointNude.webp" alt="">
+    <img class="toleft" src="Texts/ToLeft.webp" alt="">
+    <img class="toright" src="Texts/ToRight.webp" alt="">
+    <img class="eco" src="Texts/ecocivgreen.webp" alt="Ecociv">
+    <div class="eco-text">Inspired by Jeremy Lent's <i>Ecocivilization</i> and U.K. Le Guin's <i>The Dispossessed</i> and <i>Eye of the Heron</i>, you are the child of the Leader of The City, a rigid capitalist oligarchy, controlled by violence and built on extraction and exploitation. Through an extraordinary encounter you catch a glimpse of who lives on what you always believed to simply be the Moon. From then on nothing will ever be the same again.</div>
+    <div class="eco-text eco-text-white" aria-hidden="true">Inspired by Jeremy Lent's <i>Ecocivilization</i> and U.K. Le Guin's <i>The Dispossessed</i> and <i>Eye of the Heron</i>, you are the child of the Leader of The City, a rigid capitalist oligarchy, controlled by violence and built on extraction and exploitation. Through an extraordinary encounter you catch a glimpse of who lives on what you always believed to simply be the Moon. From then on nothing will ever be the same again.</div>
+    <div class="eco-desc"><i>ECOCIV I</i> is a 2.5D adventure puzzle and vernacular community-building exploration game where you grow a mobile open-source fabrication and resource-sharing society right under the noses of the oligarchs of The City. My aim with ECOCIV is to introduce symbiocene ideas as implicit values within a videogame economy.</div>
+    <div class="eco-desc eco-desc-white" aria-hidden="true"><i>ECOCIV I</i> is a 2.5D adventure puzzle and vernacular community-building exploration game where you grow a mobile open-source fabrication and resource-sharing society right under the noses of the oligarchs of The City. My aim with ECOCIV is to introduce symbiocene ideas as implicit values within a videogame economy.</div>
+    <img class="deadcert" src="Texts/DeadCertGP.webp" alt="Dead Cert GP">
+    <div class="names-mask"></div>
+    <div class="deadcert-text">Also a fan of those addictive machine-learning simulation videos of AI figuring out how to run hurdles? I built that idea into an F1 betting game featuring all 77 seasons since 1950 with era-correct tracks. Bet on race winners, podiums, and championships against a growing pool of bettors, working your way up from 5CR low-stakes pools to the big leagues.</div>
+    <div class="deadcert-text deadcert-text-white" aria-hidden="true">Also a fan of those addictive machine-learning simulation videos of AI figuring out how to run hurdles? I built that idea into an F1 betting game featuring all 77 seasons since 1950 with era-correct tracks. Bet on race winners, podiums, and championships against a growing pool of bettors, working your way up from 5CR low-stakes pools to the big leagues.</div>
+    <div class="deadcert-desc">
+		<i>DEAD CERT GP</i> is a python 2D game using pygame and numpy. Machine learning is done with neat-python for the genetic algorithm training with an added PPO (Proximal Policy Optimization) to teach generalisation on different track shapes.</div>
+    <div class="deadcert-desc deadcert-desc-white" aria-hidden="true">
+		<i>DEAD CERT GP</i> is a python 2D game using pygame and numpy. Machine learning is done with neat-python for the genetic algorithm training with an added PPO (Proximal Policy Optimization) to teach generalisation on different track shapes.</div>
     <div class="drive-text">What if, on your 18th birthday, your grandmother who you have been living with since you were 8, tells you there is more to the passing of your parents than what you were previously told to believe?</div>
-    <div class="drive-desc">DRIVE is an android 2D a-synchronous competition car collecting game developed in Unity. Centered on deep gameplay and an evolving ever expanding world where systems are interconnected and all actions have consequences. Play anywhere on earth. Every street name, town, and city layout is an exact match to the real world.</div>
+    <div class="drive-text drive-text-white" aria-hidden="true">What if, on your 18th birthday, your grandmother who you have been living with since you were 8, tells you there is more to the passing of your parents than what you were previously told to believe?</div>
+    <div class="drive-desc">
+		<i>DRIVE</i> is an android 2D a-synchronous competition car collecting game developed in Unity. Centered on deep gameplay and an evolving ever expanding world where systems are interconnected and all actions have consequences. Play anywhere on earth. Every street name, town, and city layout is an exact match to the real world.</div>
+    <div class="drive-desc drive-desc-white" aria-hidden="true">
+		<i>DRIVE</i> is an android 2D a-synchronous competition car collecting game developed in Unity. Centered on deep gameplay and an evolving ever expanding world where systems are interconnected and all actions have consequences. Play anywhere on earth. Every street name, town, and city layout is an exact match to the real world.</div>
     <div class="links"><div class="links-inner"><img src="Texts/mail-insta-linkedrecolor.webp" alt="Mail, Instagram, LinkedIn, Discord"><a class="link-btn mail" href="mailto:gouwylieven@yahoo.com" aria-label="Email"></a><a class="link-btn insta" href="https://instagram.com/gouwylieven" target="_blank" rel="noopener" aria-label="Instagram"></a><a class="link-btn linked" href="https://www.linkedin.com/in/lieven-gouwy-43342138b/" target="_blank" rel="noopener" aria-label="LinkedIn"></a><a class="link-btn discord" href="https://discord.gg/ZEFcwcfq6A" target="_blank" rel="noopener" aria-label="Discord"></a></div></div>
     <img class="congrats" src="Texts/Congrats.webp" alt="Congrats">
     <img class="signup" src="Texts/Signup.webp" alt="Signup">
@@ -429,7 +627,9 @@
     <input id="email" class="email" type="email" name="no-autocomplete-email" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Email Address..." aria-label="Email address">
     <div class="clock">00:00</div>
     <div class="steps">Rudy's stepcounter: 1</div>
-    <div class="quote">The more things go on moving, interrelating, conflicting, changing, the less balance there is and the more life. - U. K. Le Guin</div>
+    <div class="steps steps-white" aria-hidden="true">Rudy's stepcounter: 1</div>
+    <div class="quote">The more things go on moving, interrelating, conflicting, the less balance there is and the more life. - U. K. Le Guin</div>
+    <div class="quote quote-white" aria-hidden="true">The more things go on moving, interrelating, conflicting, the less balance there is and the more life. - U. K. Le Guin</div>
     <div class="sprite"></div>
   </div>
 <script>
@@ -444,7 +644,9 @@
   const sprite = document.querySelector('.sprite');
   const clock = document.querySelector('.clock');
   const stepsEl = document.querySelector('.steps');
+  const stepsWhite = document.querySelector('.steps-white');
   const quoteEl = document.querySelector('.quote');
+  const quoteWhite = document.querySelector('.quote-white');
   const howmany = document.querySelector('.howmany');
   const congrats = document.querySelector('.congrats');
   const signup = document.querySelector('.signup');
@@ -452,6 +654,7 @@
   const result = document.getElementById('result');
   const email = document.getElementById('email');
   let guessedSeconds = null;
+  const SEASONS = [["1950", "Nino Farina, Juan Fangio, Luigi Fagioli, Reg Parnell, Louis Rosier, Yves Cabantous, Philippe Étancelin, Raymond Sommer, Alberto Ascari, Peter Whitehead, Johnnie Parsons, Cecil Green, Bill Holland, Mauri Rose, Prince Bira, Louis Chiron, Eugène Chaboud, Dorino Serafini, Joie Chitwood, Tony Bettenhausen, Felice Bonetto, Robert Manzon"], ["1951", "Alberto Ascari, José Froilán González, Luigi Villoresi, Piero Taruffi, Juan Fangio, Nino Farina, Felice Bonetto, Luigi Fagioli, Consalvo Sanesi, Toulo de Graffenried, Lee Wallard, Mike Nazaruk, Manny Ayulo, Jack McGrath, Louis Rosier, Yves Cabantous, Louis Chiron, Johnny Claes, Reg Parnell, Philippe Étancelin, Andy Linden, Bobby Ball"], ["1952", "Alberto Ascari, Nino Farina, Piero Taruffi, Rudi Fischer, Robert Manzon, Jean Behra, Jim Rathmann, Sam Hanks, Art Cross, Bill Vukovich, Mike Hawthorn, Alan Brown, José Froilán González, Felice Bonetto, Dennis Poore, Eric Thompson, Luigi Villoresi, Maurice Trintignant, Troy Ruttman, Ken Wharton, Duane Carter, Paul Frère"], ["1953", "Alberto Ascari, Nino Farina, Mike Hawthorn, Luigi Villoresi, Juan Fangio, José Froilán González, Toulo de Graffenried, Felice Bonetto, Onofre Marimón, Oscar Gálvez, Bill Vukovich, Art Cross, Duane Carter, Sam Hanks, Jack McGrath, Fred Agabashian, Maurice Trintignant, Jean Behra, Louis Rosier, Hermann Lang, Paul Russo, Harry Schell"], ["1954", "José Froilán González, Mike Hawthorn, Maurice Trintignant, Nino Farina, Robert Manzon, Umberto Maglioli, Juan Fangio, Karl Kling, Roberto Mieres, Luigi Musso, Onofre Marimón, Stirling Moss, Sergio Mantovani, Prince Bira, Bill Vukovich, Jack McGrath, André Pilette, Élie Bayol, Hans Herrmann, Luigi Villoresi, Mike Nazaruk, Jimmy Bryan"], ["1955", "Juan Fangio, Stirling Moss, Eugenio Castellotti, Maurice Trintignant, Nino Farina, Piero Taruffi, Paul Frère, José Froilán González, Roberto Mieres, Jean Behra, Luigi Musso, Carlos Menditeguy, Bob Sweikert, Jimmy Davies, Tony Bettenhausen, Paul Russo, Karl Kling, Umberto Maglioli, Cesare Perdisa, Walt Faulkner, Johnny Thomson, Luigi Villoresi"], ["1956", "Juan Fangio, Peter Collins, Eugenio Castellotti, Paul Frère, Luigi Musso, Alfonso de Portago, Stirling Moss, Jean Behra, Paco Godia, Cesare Perdisa, Horace Gould, Louis Rosier, Sam Hanks, Johnnie Parsons, Ron Flockhart, Mike Hawthorn, Luigi Villoresi, Pat Flaherty, Jack Fairman, Don Freeland, Harry Schell, Hernando da Silva Ramos"], ["1957", "Juan Fangio, Masten Gregory, Harry Schell, Jean Behra, Carlos Menditeguy, Giorgio Scarlatti, Luigi Musso, Mike Hawthorn, Peter Collins, Maurice Trintignant, Wolfgang von Trips, José Froilán González, Stirling Moss, Tony Brooks, Sam Hanks, Jim Rathmann, Paul Russo, Andy Linden, Alfonso de Portago, Stuart Lewis-Evans, Jimmy Bryan, Roy Salvadori"], ["1958", "Stirling Moss, Tony Brooks, Mike Hawthorn, Peter Collins, Luigi Musso, Phil Hill, Roy Salvadori, Maurice Trintignant, Harry Schell, Jean Behra, Juan Fangio, Jo Bonnier, Cliff Allison, Graham Hill, Jimmy Bryan, George Amick, Tony Bettenhausen, Jim Rathmann, Stuart Lewis-Evans, Wolfgang von Trips, Jack Brabham, Johnny Boyd"], ["1959", "Jack Brabham, Stirling Moss, Maurice Trintignant, Bruce McLaren, Tony Brooks, Phil Hill, Dan Gurney, Olivier Gendebien, Cliff Allison, Jean Behra, Jo Bonnier, Harry Schell, Innes Ireland, Graham Hill, Tony Bettenhausen, Paul Goldsmith, Masten Gregory, Ron Flockhart, Roy Salvadori, Rodger Ward, Jim Rathmann, Johnny Thomson"], ["1960", "Jack Brabham, Bruce McLaren, Olivier Gendebien, Tony Brooks, Stirling Moss, Innes Ireland, Jim Clark, John Surtees, Phil Hill, Wolfgang von Trips, Richie Ginther, Cliff Allison, Jo Bonnier, Graham Hill, Jim Rathmann, Rodger Ward, Henry Taylor, Willy Mairesse, Carlos Menditeguy, Giulio Cabianca, Paul Goldsmith, Don Branson"], ["1961", "Phil Hill, Wolfgang von Trips, Richie Ginther, Giancarlo Baghetti, Stirling Moss, Innes Ireland, Jim Clark, Henry Taylor, Dan Gurney, Jo Bonnier, Bruce McLaren, Jack Brabham, John Surtees, Jackie Lewis, Roy Salvadori, Masten Gregory, Tony Brooks, Graham Hill, Lorenzo Bandini, Maurice Trintignant, Carel Godin de Beaufort, Olivier Gendebien"], ["1962", "Graham Hill, Richie Ginther, Jim Clark, Jack Brabham, Trevor Taylor, Innes Ireland, Neville Lederle, Maurice Trintignant, Bruce McLaren, Tony Maggs, Dan Gurney, Jo Bonnier, Phil Hill, Giancarlo Baghetti, Lorenzo Bandini, Ricardo Rodríguez, Masten Gregory, Jo Siffert, Jackie Lewis, John Surtees, Carel Godin de Beaufort, Willy Mairesse"], ["1963", "Jim Clark, Trevor Taylor, Richie Ginther, Graham Hill, Dan Gurney, Jack Brabham, John Surtees, Ludovico Scarfiotti, Bruce McLaren, Tony Maggs, Gerhard Mitter, Carel Godin de Beaufort, Jim Hall, Jo Siffert, Chris Amon, Mike Hailwood, Lorenzo Bandini, Jo Bonnier, Innes Ireland, Masten Gregory, Tony Settember, Phil Hill"], ["1964", "John Surtees, Lorenzo Bandini, Graham Hill, Richie Ginther, Tony Maggs, Maurice Trintignant, Jim Clark, Peter Arundell, Mike Spence, Walt Hansgen, Dan Gurney, Jack Brabham, Bob Anderson, Jo Bonnier, Bruce McLaren, Phil Hill, Innes Ireland, Trevor Taylor, Chris Amon, Mike Hailwood, Pedro Rodríguez, Jo Siffert"], ["1965", "Jim Clark, Mike Spence, Graham Hill, Jackie Stewart, Dan Gurney, Jack Brabham, Denny Hulme, Bob Anderson, John Surtees, Lorenzo Bandini, Bruce McLaren, Jochen Rindt, Richie Ginther, Ronnie Bucknum, Jo Siffert, Frank Gardner, Richard Attwood, Innes Ireland, Paul Hawkins, Masten Gregory, Jo Bonnier, Pedro Rodríguez"], ["1966", "Jack Brabham, Denny Hulme, Lorenzo Bandini, Mike Parkes, John Surtees, Jochen Rindt, Jo Siffert, Jo Bonnier, Graham Hill, Jackie Stewart, Mike Spence, Peter Arundell, Ludovico Scarfiotti, Guy Ligier, Bob Bondurant, Pedro Rodríguez, Jim Clark, Dan Gurney, Richie Ginther, Bruce McLaren, Bob Anderson, John Taylor"], ["1967", "Denny Hulme, Jack Brabham, Jim Clark, Graham Hill, Pedro Rodríguez, Jochen Rindt, Jo Siffert, Jo Bonnier, Chris Amon, Mike Parkes, Jackie Stewart, Mike Spence, Chris Irwin, David Hobbs, Guy Ligier, Jacky Ickx, John Surtees, Ludovico Scarfiotti, Dan Gurney, John Love, Bruce McLaren, Bob Anderson"], ["1968", "Graham Hill, Jo Siffert, Jim Clark, Jackie Oliver, Denny Hulme, Bruce McLaren, Jackie Stewart, Johnny Servoz-Gavin, Jacky Ickx, Chris Amon, Pedro Rodríguez, Richard Attwood, Ludovico Scarfiotti, Lucien Bianchi, Vic Elford, Brian Redman, Piers Courage, John Surtees, Jochen Rindt, Jean-Pierre Beltoise, Jo Bonnier, Dan Gurney"], ["1969", "Jackie Stewart, Jean-Pierre Beltoise, Jacky Ickx, Piers Courage, Jack Brabham, Silvio Moser, Jochen Rindt, Graham Hill, Jo Siffert, Richard Attwood, Jo Bonnier, Pete Lovely, Mario Andretti, John Miles, Bruce McLaren, Denny Hulme, John Surtees, Jackie Oliver, Chris Amon, Pedro Rodríguez, Johnny Servoz-Gavin, Vic Elford"], ["1988", "Ayrton Senna, Alain Prost, Gerhard Berger, Michele Alboreto, Thierry Boutsen, Alessandro Nannini, Nelson Piquet, Satoru Nakajima, Derek Warwick, Eddie Cheever, Ivan Capelli, Maurício Gugelmin, Nigel Mansell, Riccardo Patrese, Pierluigi Martini, Luis Pérez-Sala, Jonathan Palmer, Andrea de Cesaris, Philippe Alliot, Alex Caffi, Philippe Streiff, René Arnoux"], ["2021", "Lewis Hamilton, Valtteri Bottas, Max Verstappen, Sergio Pérez, Carlos Sainz, Charles Leclerc, Lando Norris, Daniel Ricciardo, Fernando Alonso, Esteban Ocon, Pierre Gasly, Yuki Tsunoda, Sebastian Vettel, Lance Stroll, George Russell, Nicholas Latifi, Kimi Räikkönen, Antonio Giovinazzi, Nikita Mazepin, Mick Schumacher"], ["2026", "Max Verstappen, Isack Hadjar, Lando Norris, Oscar Piastri, Charles Leclerc, Lewis Hamilton, George Russell, Andrea Kimi Antonelli, Fernando Alonso, Lance Stroll, Pierre Gasly, Franco Colapinto, Alexander Albon, Carlos Sainz, Nico Hulkenberg, Gabriel Bortoleto, Esteban Ocon, Oliver Bearman, Liam Lawson, Arvid Lindblad, Sergio Perez, Valtteri Bottas"]];
 
   /* 1 play loop = 1 step, counted 600 ms into the loop at 1x.
      Polled from the play animation's currentTime so it follows
@@ -459,6 +662,7 @@
   let steps = 1;
   const renderSteps = () => {
     stepsEl.textContent = `Rudy's stepcounter: ${steps}`;
+    stepsWhite.textContent = `Rudy's stepcounter: ${steps}`;
   };
   renderSteps();
   let pastMid = false;
@@ -608,6 +812,7 @@
     steps = 1;
     renderSteps();
     stepsEl.style.display = 'block';
+    stepsWhite.style.display = 'block';
 
     let start = performance.now();
     adjustClock = gap => { start += gap; };
@@ -624,6 +829,7 @@
       render();
       clock.classList.add('hidden');
       stepsEl.style.display = 'none';
+      stepsWhite.style.display = 'none';
       congrats.style.display = 'block';
       /* Show the visitor's guess + a random hundredths value
          (e.g. guess 30 -> "30.36 seconds!") centered on the
@@ -668,6 +874,7 @@
     email.style.display = 'none';
     email.blur();
     stepsEl.style.display = 'block';
+    stepsWhite.style.display = 'block';
   });
 
   const words = document.querySelectorAll('.word');
@@ -676,8 +883,131 @@
   const contactWord = document.querySelector('.word.contact');
   const asan = document.querySelector('.asan');
   const drive = document.querySelector('.drive');
+  const pointnude = document.querySelector('.pointnude');
+  const pointnudeShadow = document.querySelector('.pointnude-shadow');
+  const toleft = document.querySelector('.toleft');
+  const toright = document.querySelector('.toright');
   const driveText = document.querySelector('.drive-text');
+  const driveTextWhite = document.querySelector('.drive-text-white');
   const driveDesc = document.querySelector('.drive-desc');
+  const driveDescWhite = document.querySelector('.drive-desc-white');
+  const eco = document.querySelector('.eco');
+  const ecoText = document.querySelector('.eco-text');
+  const ecoTextWhite = document.querySelector('.eco-text-white');
+  const ecoDesc = document.querySelector('.eco-desc');
+  const ecoDescWhite = document.querySelector('.eco-desc-white');
+  const ecoSet = [eco, ecoText, ecoTextWhite, ecoDesc, ecoDescWhite];
+  const showEcoSet = show => ecoSet.forEach(el => { el.style.display = show ? 'block' : 'none'; });
+  /* Vertically center the rendered eco art in the gap between the
+     bottom of the eco top text (top 143 + wrapped height) and the
+     top of the eco bottom text (732). Measured live so text edits
+     can't break it; art height derived from the image itself. */
+  const layoutEco = () => {
+    if (!eco.naturalWidth) return;
+    const s = Math.min(676 / eco.naturalWidth, 526 / eco.naturalHeight);
+    const artH = eco.naturalHeight * s;
+    const textBottom = 143 + ecoText.offsetHeight;
+    const artTop = textBottom + Math.max(0, (732 - textBottom - artH) / 2);
+    eco.style.top = (artTop - (526 - artH) / 2) + 'px';
+  };
+  /* Second projects view: ToRight hides Drive + its texts and
+     shows Ecocivgreen; ToLeft restores Drive. Arrows stay put. */
+  /* Projects pager: 0 = Drive, 1 = Ecociv, 2 = DeadCert.
+     ToRight steps forward (wraps DeadCert -> Drive),
+     ToLeft steps back. Arrows stay visible on all three. */
+  let viewIndex = 0;
+  const deadcertArt = document.querySelector('.deadcert');
+  const namesMask = document.querySelector('.names-mask');
+  const deadcertText = document.querySelector('.deadcert-text');
+  const deadcertTextWhite = document.querySelector('.deadcert-text-white');
+  const deadcertDesc = document.querySelector('.deadcert-desc');
+  const deadcertDescWhite = document.querySelector('.deadcert-desc-white');
+  const deadcertSet = [deadcertArt, namesMask, deadcertText, deadcertTextWhite, deadcertDesc, deadcertDescWhite];
+  const showDeadcertSet = show => deadcertSet.forEach(el => { el.style.display = show ? 'block' : 'none'; });
+  /* One 8 px line per season, spread evenly across the word band
+     (source rows 278-487 of the 1408x768 art). Each track crosses
+     once and stays gone; duration from a random 10-60 px/s speed.
+     Built once, speeds re-rolled on every visit so lines always
+     enter from offscreen-right. */
+  let namesBuilt = false;
+  const buildNames = () => {
+    if (namesBuilt) return;
+    namesBuilt = true;
+    const s = Math.min(676 / 1408, 526 / 768);
+    const bandTop = (526 - 768 * s) / 2 + 278 * s;
+    const pitch = (210 * s) / SEASONS.length;
+    SEASONS.forEach(([year, drivers], i) => {
+      const line = document.createElement('div');
+      line.className = 'names-line';
+      line.style.top = (bandTop + i * pitch) + 'px';
+      line.style.lineHeight = pitch + 'px';
+      const track = document.createElement('div');
+      track.className = 'names-track';
+      const unit = `${year} · ${drivers.replace(/, /g, ' · ')} · `;
+      track.textContent = unit.repeat(Math.max(2, Math.ceil(760 / (unit.length * 2.8))));
+      line.appendChild(track);
+      namesMask.appendChild(line);
+    });
+  };
+  const rollNameSpeeds = () => {
+    namesMask.querySelectorAll('.names-track').forEach(track => {
+      /* Single crossing: from offscreen-right (676) to fully
+         offscreen-left (-width), at a random 10-60 px/s. */
+      const dist = 676 + track.scrollWidth;
+      const speed = 10 + Math.random() * 50;
+      const dur = dist / speed;
+      track.style.animationDuration = dur + 's';
+      /* Positive delay with backwards fill: every line waits
+         offscreen-right (mask empty at first), then trickles in.
+         Capped at 2 s so the first lines appear promptly even at
+         the slowest 10 px/s scroll speeds. */
+      track.style.animationDelay = (Math.random() * 2) + 's';
+    });
+  };
+  /* Vertically center the rendered deadcert art (+mask, same box)
+     in the gap between the bottom of the deadcert top text
+     (top 143 + wrapped height) and the top of the deadcert
+     bottom text (732). Measured live so text edits can't break it. */
+  const layoutDeadcert = () => {
+    if (!deadcertArt.naturalWidth) return;
+    const s = Math.min(676 / deadcertArt.naturalWidth, 526 / deadcertArt.naturalHeight);
+    const artH = deadcertArt.naturalHeight * s;
+    const textBottom = 143 + deadcertText.offsetHeight;
+    const artTop = textBottom + Math.max(0, (732 - textBottom - artH) / 2);
+    const boxTop = artTop - (526 - artH) / 2;
+    deadcertArt.style.top = boxTop + 'px';
+    namesMask.style.top = boxTop + 'px';
+  };
+  const showView = i => {
+    viewIndex = i;
+    showDriveSet(i === 0);
+    showEcoSet(i === 1);
+    if (i === 2) {
+      showDeadcertSet(true);
+      buildNames();
+      rollNameSpeeds();
+      layoutDeadcert();
+    } else {
+      showDeadcertSet(false);
+    }
+    if (i === 1) layoutEco();
+  };
+  toright.addEventListener('click', () => {
+    if (!projectsWord.classList.contains('active')) return;
+    showView((viewIndex + 1) % 3);
+  });
+  toleft.addEventListener('click', () => {
+    if (!projectsWord.classList.contains('active')) return;
+    showView((viewIndex + 2) % 3);
+  });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      if (viewIndex === 1) layoutEco();
+      else if (viewIndex === 2) layoutDeadcert();
+    });
+  }
+  const driveSet = [drive, pointnude, pointnudeShadow, driveText, driveTextWhite, driveDesc, driveDescWhite];
+  const showDriveSet = show => driveSet.forEach(el => { el.style.display = show ? 'block' : 'none'; });
   const links = document.querySelector('.links');
   words.forEach(word => {
     word.addEventListener('click', () => {
@@ -686,9 +1016,20 @@
       if (!wasActive) word.classList.add('active');
       asan.style.display = aboutWord.classList.contains('active') ? 'block' : 'none';
       drive.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
+      pointnude.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
+      pointnudeShadow.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
+      toleft.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
+      toright.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
       driveText.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
+      driveTextWhite.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
       driveDesc.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
+      driveDescWhite.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
+      /* Reopening Projects always starts on Drive. */
+      viewIndex = 0;
+      showEcoSet(false);
+      showDeadcertSet(false);
       quoteEl.style.display = contactWord.classList.contains('active') ? 'block' : 'none';
+      quoteWhite.style.display = contactWord.classList.contains('active') ? 'block' : 'none';
       links.style.display = contactWord.classList.contains('active') ? 'flex' : 'none';
     });
   });
