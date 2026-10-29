@@ -571,8 +571,8 @@
   }
   /* Blinking caret for the two fields. The native caret only shows once
      a field is focused, and phones never autofocus, so an empty,
-     unfocused field gets its own bar left of its placeholder (JS sets
-     the box; this rule only owns the look and the blink). */
+     unfocused field gets its own bar in its middle (JS sets the box;
+     this rule only owns the look and the blink). */
   .caret {
     position: absolute;
     display: none;
@@ -580,7 +580,7 @@
     border-radius: 2px;
     background: #d9a6a8;
     pointer-events: none;
-    transform: translateY(-50%);
+    transform: translate(-50%, -50%);
     animation: caret-blink 1.1s step-end infinite;
   }
 
@@ -1035,26 +1035,16 @@
   const emailCaret = document.getElementById('emailCaret');
   /* Blinking caret hint for the two fields. The native caret only shows
      once a field has focus and phones never autofocus, so an empty,
-     unfocused field gets its own bar just left of its placeholder. The
-     bar is measured in the stage's own (unscaled) coordinates and hides
-     as soon as the field is focused or has text. */
-  const caretRuler = document.createElement('span');
-  caretRuler.style.cssText =
-    'position:absolute;left:0;top:0;visibility:hidden;white-space:pre;pointer-events:none;';
-  stage.appendChild(caretRuler);
+     unfocused field gets its own bar in its middle. The bar is placed in
+     the stage's own (unscaled) coordinates and hides as soon as the
+     field is focused or has text. */
   const syncCaret = (field, caret) => {
     if (field.style.display !== 'block' || field.value !== '' ||
         document.activeElement === field || !field.offsetWidth) {
       caret.style.display = 'none';
       return;
     }
-    /* Placeholder width with the placeholder's own face/size. */
     const ps = getComputedStyle(field, '::placeholder');
-    caretRuler.style.font =
-      `${ps.fontStyle} ${ps.fontWeight} ${ps.fontSize} ${ps.fontFamily}`;
-    caretRuler.style.letterSpacing = ps.letterSpacing;
-    caretRuler.textContent = field.placeholder || '';
-    const textW = caretRuler.offsetWidth;
     const sr = stage.getBoundingClientRect();
     const fr = field.getBoundingClientRect();
     const s = stageScale || 1;
@@ -1062,7 +1052,7 @@
     const cy = (fr.top - sr.top) / s + fr.height / (2 * s);
     const size = parseFloat(ps.fontSize) || 16;
     caret.style.height = Math.max(12, size * 0.85) + 'px';
-    caret.style.left = (cx - textW / 2 - 9) + 'px';
+    caret.style.left = cx + 'px';
     caret.style.top = cy + 'px';
     caret.style.display = 'block';
   };
