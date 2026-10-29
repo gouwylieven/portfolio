@@ -670,15 +670,21 @@
       order: 3;
       margin-top: 16px;
     }
+    /* Project tagline + description: same face and settings as the
+       mobile About copy (.asan-text p) so all three panels read alike. */
     .drive-text, .eco-text, .deadcert-text {
       position: static;
       width: 100%;
       order: 2;
       margin-top: 18px;
-      font-size: clamp(16px, 4.6vw, 20px);
-      line-height: 1.42;
+      font-family: 'Handjet', monospace;
+      font-weight: 200;
+      font-size: clamp(17px, 4.7vw, 20px);
+      line-height: 1.5;
       letter-spacing: 0;
-      text-align: left;
+      text-align: justify;
+      text-justify: inter-word;
+      overflow-wrap: break-word;
       transform: none;
       color: #ffffff;
       opacity: 1;
@@ -688,10 +694,14 @@
       width: 100%;
       order: 4;
       margin-top: 16px;
-      font-size: clamp(15px, 4.3vw, 18px);
-      line-height: 1.45;
+      font-family: 'Handjet', monospace;
+      font-weight: 200;
+      font-size: clamp(17px, 4.7vw, 20px);
+      line-height: 1.5;
       letter-spacing: 0;
-      text-align: left;
+      text-align: justify;
+      text-justify: inter-word;
+      overflow-wrap: break-word;
       transform: none;
       color: #ccaea5;
       opacity: 1;
