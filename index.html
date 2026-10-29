@@ -747,8 +747,12 @@
       position: static;
       width: 100%;
       height: auto;
+      /* Twice the artwork's natural height (1699x52) so the line reads
+         as a floor rather than a hairline; object-fit fills it. */
+      aspect-ratio: 1699 / 104;
+      object-fit: fill;
       order: 6;
-      margin-top: 96px;         /* headroom for Rudy's body */
+      margin-top: 70px;         /* headroom for Rudy's body */
     }
     .sprite { top: 0; }         /* layoutBar() sets the real value */
 
@@ -767,6 +771,8 @@
       box-shadow: inset 0 0 0 1px rgba(204, 174, 165, 0.35);
       color: #e6d3ca;
     }
+    /* The guess is a single nudge, not a form: a third of the column. */
+    .guess { left: 33.5%; width: 33%; }
     .email, .result { font-size: 21px; }
     .guess::placeholder, .email::placeholder {
       font-size: 19px;
@@ -813,16 +819,19 @@
       -webkit-text-stroke: 0;
     }
 
-    /* Bitmap phase lines swap to their text twins (see .phase above). */
+    /* Bitmap phase lines swap to their text twins (see .phase above).
+       Same LED face as the guess field / clock. */
     .phase { order: 7; margin-top: 16px; }
     .phase .howmany, .phase .congrats, .phase .signup { display: none; }
     .phase-text {
       display: block;
-      font-family: 'Microsoft Yi Baiti', sans-serif;
-      font-size: clamp(17px, 5vw, 22px);
-      line-height: 1.3;
-      letter-spacing: 0.5px;
-      color: #ccaea5;
+      font-family: 'Handjet', monospace;
+      font-variation-settings: 'ELSH' 16;
+      font-weight: 200;
+      font-size: clamp(21px, 6.2vw, 27px);
+      line-height: 1.25;
+      letter-spacing: 1px;
+      color: #e6d3ca;
     }
   }
 </style>
@@ -975,7 +984,7 @@
      (98 + 16 px of cell padding = the line's left edge at 114), and
      the mobile column — where the line is simply full width — gets
      bounds that fit it. */
-  const spriteK = () => (isMobile ? 0.7 : 1);
+  const spriteK = () => (isMobile ? 0.35 : 1);
   let LEFT_TX = 98, RIGHT_TX = 1699;
   let BASE_SPEED = (RIGHT_TX - LEFT_TX) / 60;
   const updatePatrolBounds = () => {
