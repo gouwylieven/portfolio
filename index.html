@@ -718,14 +718,17 @@
       object-fit: contain;
     }
 
-    /* Contact icons. */
+    /* Contact icons: the artwork shrinks to the column width and the
+       four invisible link buttons scale with it (25% each). */
     .links {
       position: static;
+      width: 100%;
       height: auto;
       order: 2;
       margin-top: 18px;
       justify-content: flex-start;
     }
+    .links-inner { width: 100%; }
     .links img { width: 100%; height: auto; }
 
     /* About copy: text twin instead of the bitmap. */
@@ -822,16 +825,25 @@
     }
 
     /* Quote sits above the WalkingLine like on the desktop; the step
-       counter, clock and phase lines sit under it. */
+       counter, clock and phase lines sit under it. Same LED face and
+       size as the stepcounter, pulled down into the line's 44 px
+       headroom so it ends 6 px above the line - the same gap the
+       stepcounter keeps below it (44 + 10 - 6 = 48). */
     .quote {
-      position: static;
+      position: relative;
+      top: calc(44px + 10px - 6px);
+      left: 0;                  /* clear the desktop 114 px offset */
+      right: auto;
       order: 5;
       width: 100%;
       margin-top: 18px;
       margin-bottom: 10px;
-      font-size: clamp(14px, 4vw, 17px);
-      line-height: 1.45;
-      letter-spacing: 0;
+      font-family: 'Handjet', monospace;
+      font-variation-settings: 'ELSH' 16;
+      font-weight: 200;
+      font-size: calc(var(--line-h, 44px) * 0.36);
+      line-height: 1.2;
+      letter-spacing: 1px;
       white-space: normal;
       text-align: left;
       transform: none;
