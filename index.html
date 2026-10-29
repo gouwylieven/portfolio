@@ -760,10 +760,12 @@
       top: 0;                   /* layoutBar() centers it on the line */
       left: 8%;
       width: 84%;
-      height: 54px;
-      line-height: 54px;
-      font-size: 26px;
-      border-radius: 8px;
+      /* Keep the field inside the walking line: layoutBar() publishes
+         the line's rendered height as --line-h. */
+      height: calc(var(--line-h, 44px) - 6px);
+      line-height: calc(var(--line-h, 44px) - 6px);
+      font-size: calc(var(--line-h, 44px) * 0.56);
+      border-radius: 6px;
       transform: translateY(-50%);
       /* The line is a pale bar at this width, so the field needs its
          own contrast instead of the desktop's translucent black. */
@@ -771,18 +773,38 @@
       box-shadow: inset 0 0 0 1px rgba(204, 174, 165, 0.35);
       color: #e6d3ca;
     }
-    /* The guess is a single nudge, not a form: a third of the column. */
-    .guess { left: 33.5%; width: 33%; }
-    .email, .result { font-size: 21px; }
+    /* Guess and arrival time are the same little number, same box. */
+    .guess, .result { left: 33.5%; width: 33%; }
+    .email { font-size: calc(var(--line-h, 44px) * 0.46); }
     .guess::placeholder, .email::placeholder {
-      font-size: 19px;
+      font-size: calc(var(--line-h, 44px) * 0.42);
       color: rgba(204, 174, 165, 0.95);
+    }
+
+    /* Rudy's stepcounter: same LED face as the field, right-aligned and
+       tight under the line; the clock sits below it. */
+    .steps {
+      position: static;
+      order: 7;
+      width: 100%;
+      margin-top: 6px;
+      font-family: 'Handjet', monospace;
+      font-variation-settings: 'ELSH' 16;
+      font-weight: 200;
+      font-size: calc(var(--line-h, 44px) * 0.5);
+      line-height: 1.2;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      text-align: right;
+      transform: none;
+      color: #e6d3ca;
+      -webkit-text-stroke: 0;
     }
 
     .clock {
       position: static;
-      order: 7;
-      margin-top: 16px;
+      order: 9;
+      margin-top: 20px;
       text-align: center;
       font-size: 34px;
     }
@@ -804,21 +826,6 @@
       color: rgba(204, 174, 165, 0.8);
       -webkit-text-stroke: 0;
     }
-    .steps {
-      position: static;
-      order: 7;
-      width: 100%;
-      margin-top: 14px;
-      font-size: clamp(14px, 4vw, 17px);
-      line-height: 1.45;
-      letter-spacing: 0;
-      white-space: normal;
-      text-align: left;
-      transform: none;
-      color: rgba(204, 174, 165, 0.8);
-      -webkit-text-stroke: 0;
-    }
-
     /* Bitmap phase lines swap to their text twins (see .phase above).
        Same LED face as the guess field / clock. */
     .phase { order: 7; margin-top: 16px; }
@@ -1153,11 +1160,10 @@
       stepsEl.style.display = 'none';
       stepsWhite.style.display = 'none';
       congratsPhase.style.display = 'block';
-      /* Show the visitor's guess + a random hundredths value
-         (e.g. guess 30 -> "30.36 seconds!") centered on the
-         WalkingLine with the same background as the time input. */
+      /* Show the visitor's guess in the same little box as the input
+         (e.g. 30 -> "30.36s") centered on the WalkingLine. */
       const hundredths = String(Math.floor(Math.random() * 100)).padStart(2, '0');
-      result.textContent = `${guessedSeconds}.${hundredths} seconds!`;
+      result.textContent = `${guessedSeconds}.${hundredths}s`;
       result.style.display = 'block';
       /* Restart after 6 s at base speed; the flip happens then.
          The visible email field acts as a bound from here on. */
@@ -1178,7 +1184,7 @@
     const tick = now => {
       if (arrived) return;
       if (pageHidden) { requestAnimationFrame(tick); return; }
-      const el = (now - start) / 1000;
+      const el = Math.max(0, (now - start) / 1000);
       const ss = String(Math.floor(el) % 100).padStart(2, '0');
       const cc = String(Math.floor((el % 1) * 100)).padStart(2, '0');
       clock.textContent = ss + ':' + cc;
@@ -1470,11 +1476,14 @@
     render();
     if (!isMobile) {
       sprite.style.top = '';
+      stage.style.removeProperty('--line-h');
       [guess, email, result].forEach(el => { el.style.top = ''; });
       return;
     }
     const top = walkingLine.offsetTop;
     const h = walkingLine.offsetHeight;
+    /* The fields and the stepcounter size themselves from the line. */
+    stage.style.setProperty('--line-h', h + 'px');
     /* Stand Rudy on the line's bottom edge. The spritesheet's lowest
        drawn pixel is row 116 of the 128 px cell, and the cell scales
        about its centre, so its position is T + 64 + (116 - 64) * k. */
