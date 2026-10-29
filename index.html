@@ -592,6 +592,9 @@
     background-repeat: no-repeat;
     animation: play 1s steps(6) infinite;
     opacity: 0.97;
+    /* On the mobile column the 128 px cell reaches above the bar and
+       would otherwise swallow taps on the word buttons right above it. */
+    pointer-events: none;
   }
 
   @keyframes play {
@@ -727,8 +730,8 @@
       order: 2;
       /* Centred between the CONTACT word and the quote: the quote's own
          offset under the icons is its 18 px margin-top + the pager's
-         10 px margin + the 48 px pull into the line's headroom = 76 px. */
-      margin-top: 76px;
+         10 px margin + the 10 px pull toward the line = 38 px. */
+      margin-top: 38px;
       justify-content: flex-start;
     }
     .links-inner { width: 100%; }
@@ -766,7 +769,9 @@
       aspect-ratio: 1699 / 208;
       object-fit: fill;
       order: 6;
-      margin-top: 44px;         /* headroom for Rudy's body */
+      /* Same 6 px gap the stepcounter keeps below the line, so the bar
+         sits as close to the copy above it as the counter does. */
+      margin-top: 6px;
     }
     .sprite { top: 0; }         /* layoutBar() sets the real value */
 
@@ -829,12 +834,12 @@
 
     /* Quote sits above the WalkingLine like on the desktop; the step
        counter, clock and phase lines sit under it. Same LED face and
-       size as the stepcounter, pulled down into the line's 44 px
-       headroom so it ends 6 px above the line - the same gap the
-       stepcounter keeps below it (44 + 10 - 6 = 48). */
+       size as the stepcounter, pulled down 10 px so it ends 6 px above
+       the line - the same gap the stepcounter keeps below it
+       (6 px line margin + 10 px quote margin-bottom - 6 px gap = 10). */
     .quote {
       position: relative;
-      top: calc(44px + 10px - 6px);
+      top: calc(6px + 10px - 6px);
       left: 0;                  /* clear the desktop 114 px offset */
       right: auto;
       order: 5;
