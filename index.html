@@ -569,6 +569,25 @@
     color: rgba(204, 174, 165, 0.6);
     font-size: 48px;
   }
+  /* Blinking caret for the two fields. The native caret only shows once
+     a field is focused, and phones never autofocus, so an empty,
+     unfocused field gets its own bar left of its placeholder (JS sets
+     the box; this rule only owns the look and the blink). */
+  .caret {
+    position: absolute;
+    display: none;
+    width: 3px;
+    border-radius: 2px;
+    background: #d9a6a8;
+    pointer-events: none;
+    transform: translateY(-50%);
+    animation: caret-blink 1.1s step-end infinite;
+  }
+
+  @keyframes caret-blink {
+    0%, 50%     { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
+  }
 
   /*
     Spritesheet: 768 x 128 = 6 frames of 128 x 128.
@@ -952,8 +971,10 @@
       <p class="phase-text">How many seconds do you think it will take Rudy to cross the screen?</p>
     </div>
     <input id="guess" class="guess" type="text" inputmode="numeric" maxlength="2" autocomplete="off" spellcheck="false" placeholder="30-90" aria-label="Your guess in seconds">
+    <div id="guessCaret" class="caret" aria-hidden="true"></div>
     <div id="result" class="result" aria-live="polite"></div>
     <input id="email" class="email" type="email" name="no-autocomplete-email" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Email Address..." aria-label="Email address">
+    <div id="emailCaret" class="caret" aria-hidden="true"></div>
     <div class="clock">00:00</div>
     <div class="steps">Rudy's stepcounter: 1</div>
     <div class="steps steps-white" aria-hidden="true">Rudy's stepcounter: 1</div>
@@ -1009,6 +1030,45 @@
   const syncRobotVisibility = () => {
     sprite.classList.toggle('robot-hidden',
       isMobile && email.style.display === 'block' && email.value.trim() === '');
+  };
+  const guessCaret = document.getElementById('guessCaret');
+  const emailCaret = document.getElementById('emailCaret');
+  /* Blinking caret hint for the two fields. The native caret only shows
+     once a field has focus and phones never autofocus, so an empty,
+     unfocused field gets its own bar just left of its placeholder. The
+     bar is measured in the stage's own (unscaled) coordinates and hides
+     as soon as the field is focused or has text. */
+  const caretRuler = document.createElement('span');
+  caretRuler.style.cssText =
+    'position:absolute;left:0;top:0;visibility:hidden;white-space:pre;pointer-events:none;';
+  stage.appendChild(caretRuler);
+  const syncCaret = (field, caret) => {
+    if (field.style.display !== 'block' || field.value !== '' ||
+        document.activeElement === field || !field.offsetWidth) {
+      caret.style.display = 'none';
+      return;
+    }
+    /* Placeholder width with the placeholder's own face/size. */
+    const ps = getComputedStyle(field, '::placeholder');
+    caretRuler.style.font =
+      `${ps.fontStyle} ${ps.fontWeight} ${ps.fontSize} ${ps.fontFamily}`;
+    caretRuler.style.letterSpacing = ps.letterSpacing;
+    caretRuler.textContent = field.placeholder || '';
+    const textW = caretRuler.offsetWidth;
+    const sr = stage.getBoundingClientRect();
+    const fr = field.getBoundingClientRect();
+    const s = stageScale || 1;
+    const cx = (fr.left - sr.left) / s + fr.width / (2 * s);
+    const cy = (fr.top - sr.top) / s + fr.height / (2 * s);
+    const size = parseFloat(ps.fontSize) || 16;
+    caret.style.height = Math.max(12, size * 0.85) + 'px';
+    caret.style.left = (cx - textW / 2 - 9) + 'px';
+    caret.style.top = cy + 'px';
+    caret.style.display = 'block';
+  };
+  const syncCarets = () => {
+    syncCaret(guess, guessCaret);
+    syncCaret(email, emailCaret);
   };
   let guessedSeconds = null;
   const SEASONS = [["1950", "Nino Farina, Juan Fangio, Luigi Fagioli, Reg Parnell, Louis Rosier, Yves Cabantous, Philippe Étancelin, Raymond Sommer, Alberto Ascari, Peter Whitehead, Johnnie Parsons, Cecil Green, Bill Holland, Mauri Rose, Prince Bira, Louis Chiron, Eugène Chaboud, Dorino Serafini, Joie Chitwood, Tony Bettenhausen, Felice Bonetto, Robert Manzon"], ["1951", "Alberto Ascari, José Froilán González, Luigi Villoresi, Piero Taruffi, Juan Fangio, Nino Farina, Felice Bonetto, Luigi Fagioli, Consalvo Sanesi, Toulo de Graffenried, Lee Wallard, Mike Nazaruk, Manny Ayulo, Jack McGrath, Louis Rosier, Yves Cabantous, Louis Chiron, Johnny Claes, Reg Parnell, Philippe Étancelin, Andy Linden, Bobby Ball"], ["1952", "Alberto Ascari, Nino Farina, Piero Taruffi, Rudi Fischer, Robert Manzon, Jean Behra, Jim Rathmann, Sam Hanks, Art Cross, Bill Vukovich, Mike Hawthorn, Alan Brown, José Froilán González, Felice Bonetto, Dennis Poore, Eric Thompson, Luigi Villoresi, Maurice Trintignant, Troy Ruttman, Ken Wharton, Duane Carter, Paul Frère"], ["1953", "Alberto Ascari, Nino Farina, Mike Hawthorn, Luigi Villoresi, Juan Fangio, José Froilán González, Toulo de Graffenried, Felice Bonetto, Onofre Marimón, Oscar Gálvez, Bill Vukovich, Art Cross, Duane Carter, Sam Hanks, Jack McGrath, Fred Agabashian, Maurice Trintignant, Jean Behra, Louis Rosier, Hermann Lang, Paul Russo, Harry Schell"], ["1954", "José Froilán González, Mike Hawthorn, Maurice Trintignant, Nino Farina, Robert Manzon, Umberto Maglioli, Juan Fangio, Karl Kling, Roberto Mieres, Luigi Musso, Onofre Marimón, Stirling Moss, Sergio Mantovani, Prince Bira, Bill Vukovich, Jack McGrath, André Pilette, Élie Bayol, Hans Herrmann, Luigi Villoresi, Mike Nazaruk, Jimmy Bryan"], ["1955", "Juan Fangio, Stirling Moss, Eugenio Castellotti, Maurice Trintignant, Nino Farina, Piero Taruffi, Paul Frère, José Froilán González, Roberto Mieres, Jean Behra, Luigi Musso, Carlos Menditeguy, Bob Sweikert, Jimmy Davies, Tony Bettenhausen, Paul Russo, Karl Kling, Umberto Maglioli, Cesare Perdisa, Walt Faulkner, Johnny Thomson, Luigi Villoresi"], ["1956", "Juan Fangio, Peter Collins, Eugenio Castellotti, Paul Frère, Luigi Musso, Alfonso de Portago, Stirling Moss, Jean Behra, Paco Godia, Cesare Perdisa, Horace Gould, Louis Rosier, Sam Hanks, Johnnie Parsons, Ron Flockhart, Mike Hawthorn, Luigi Villoresi, Pat Flaherty, Jack Fairman, Don Freeland, Harry Schell, Hernando da Silva Ramos"], ["1957", "Juan Fangio, Masten Gregory, Harry Schell, Jean Behra, Carlos Menditeguy, Giorgio Scarlatti, Luigi Musso, Mike Hawthorn, Peter Collins, Maurice Trintignant, Wolfgang von Trips, José Froilán González, Stirling Moss, Tony Brooks, Sam Hanks, Jim Rathmann, Paul Russo, Andy Linden, Alfonso de Portago, Stuart Lewis-Evans, Jimmy Bryan, Roy Salvadori"], ["1958", "Stirling Moss, Tony Brooks, Mike Hawthorn, Peter Collins, Luigi Musso, Phil Hill, Roy Salvadori, Maurice Trintignant, Harry Schell, Jean Behra, Juan Fangio, Jo Bonnier, Cliff Allison, Graham Hill, Jimmy Bryan, George Amick, Tony Bettenhausen, Jim Rathmann, Stuart Lewis-Evans, Wolfgang von Trips, Jack Brabham, Johnny Boyd"], ["1959", "Jack Brabham, Stirling Moss, Maurice Trintignant, Bruce McLaren, Tony Brooks, Phil Hill, Dan Gurney, Olivier Gendebien, Cliff Allison, Jean Behra, Jo Bonnier, Harry Schell, Innes Ireland, Graham Hill, Tony Bettenhausen, Paul Goldsmith, Masten Gregory, Ron Flockhart, Roy Salvadori, Rodger Ward, Jim Rathmann, Johnny Thomson"], ["1960", "Jack Brabham, Bruce McLaren, Olivier Gendebien, Tony Brooks, Stirling Moss, Innes Ireland, Jim Clark, John Surtees, Phil Hill, Wolfgang von Trips, Richie Ginther, Cliff Allison, Jo Bonnier, Graham Hill, Jim Rathmann, Rodger Ward, Henry Taylor, Willy Mairesse, Carlos Menditeguy, Giulio Cabianca, Paul Goldsmith, Don Branson"], ["1961", "Phil Hill, Wolfgang von Trips, Richie Ginther, Giancarlo Baghetti, Stirling Moss, Innes Ireland, Jim Clark, Henry Taylor, Dan Gurney, Jo Bonnier, Bruce McLaren, Jack Brabham, John Surtees, Jackie Lewis, Roy Salvadori, Masten Gregory, Tony Brooks, Graham Hill, Lorenzo Bandini, Maurice Trintignant, Carel Godin de Beaufort, Olivier Gendebien"], ["1962", "Graham Hill, Richie Ginther, Jim Clark, Jack Brabham, Trevor Taylor, Innes Ireland, Neville Lederle, Maurice Trintignant, Bruce McLaren, Tony Maggs, Dan Gurney, Jo Bonnier, Phil Hill, Giancarlo Baghetti, Lorenzo Bandini, Ricardo Rodríguez, Masten Gregory, Jo Siffert, Jackie Lewis, John Surtees, Carel Godin de Beaufort, Willy Mairesse"], ["1963", "Jim Clark, Trevor Taylor, Richie Ginther, Graham Hill, Dan Gurney, Jack Brabham, John Surtees, Ludovico Scarfiotti, Bruce McLaren, Tony Maggs, Gerhard Mitter, Carel Godin de Beaufort, Jim Hall, Jo Siffert, Chris Amon, Mike Hailwood, Lorenzo Bandini, Jo Bonnier, Innes Ireland, Masten Gregory, Tony Settember, Phil Hill"], ["1964", "John Surtees, Lorenzo Bandini, Graham Hill, Richie Ginther, Tony Maggs, Maurice Trintignant, Jim Clark, Peter Arundell, Mike Spence, Walt Hansgen, Dan Gurney, Jack Brabham, Bob Anderson, Jo Bonnier, Bruce McLaren, Phil Hill, Innes Ireland, Trevor Taylor, Chris Amon, Mike Hailwood, Pedro Rodríguez, Jo Siffert"], ["1965", "Jim Clark, Mike Spence, Graham Hill, Jackie Stewart, Dan Gurney, Jack Brabham, Denny Hulme, Bob Anderson, John Surtees, Lorenzo Bandini, Bruce McLaren, Jochen Rindt, Richie Ginther, Ronnie Bucknum, Jo Siffert, Frank Gardner, Richard Attwood, Innes Ireland, Paul Hawkins, Masten Gregory, Jo Bonnier, Pedro Rodríguez"], ["1966", "Jack Brabham, Denny Hulme, Lorenzo Bandini, Mike Parkes, John Surtees, Jochen Rindt, Jo Siffert, Jo Bonnier, Graham Hill, Jackie Stewart, Mike Spence, Peter Arundell, Ludovico Scarfiotti, Guy Ligier, Bob Bondurant, Pedro Rodríguez, Jim Clark, Dan Gurney, Richie Ginther, Bruce McLaren, Bob Anderson, John Taylor"], ["1967", "Denny Hulme, Jack Brabham, Jim Clark, Graham Hill, Pedro Rodríguez, Jochen Rindt, Jo Siffert, Jo Bonnier, Chris Amon, Mike Parkes, Jackie Stewart, Mike Spence, Chris Irwin, David Hobbs, Guy Ligier, Jacky Ickx, John Surtees, Ludovico Scarfiotti, Dan Gurney, John Love, Bruce McLaren, Bob Anderson"], ["1968", "Graham Hill, Jo Siffert, Jim Clark, Jackie Oliver, Denny Hulme, Bruce McLaren, Jackie Stewart, Johnny Servoz-Gavin, Jacky Ickx, Chris Amon, Pedro Rodríguez, Richard Attwood, Ludovico Scarfiotti, Lucien Bianchi, Vic Elford, Brian Redman, Piers Courage, John Surtees, Jochen Rindt, Jean-Pierre Beltoise, Jo Bonnier, Dan Gurney"], ["1969", "Jackie Stewart, Jean-Pierre Beltoise, Jacky Ickx, Piers Courage, Jack Brabham, Silvio Moser, Jochen Rindt, Graham Hill, Jo Siffert, Richard Attwood, Jo Bonnier, Pete Lovely, Mario Andretti, John Miles, Bruce McLaren, Denny Hulme, John Surtees, Jackie Oliver, Chris Amon, Pedro Rodríguez, Johnny Servoz-Gavin, Vic Elford"], ["1988", "Ayrton Senna, Alain Prost, Gerhard Berger, Michele Alboreto, Thierry Boutsen, Alessandro Nannini, Nelson Piquet, Satoru Nakajima, Derek Warwick, Eddie Cheever, Ivan Capelli, Maurício Gugelmin, Nigel Mansell, Riccardo Patrese, Pierluigi Martini, Luis Pérez-Sala, Jonathan Palmer, Andrea de Cesaris, Philippe Alliot, Alex Caffi, Philippe Streiff, René Arnoux"], ["2021", "Lewis Hamilton, Valtteri Bottas, Max Verstappen, Sergio Pérez, Carlos Sainz, Charles Leclerc, Lando Norris, Daniel Ricciardo, Fernando Alonso, Esteban Ocon, Pierre Gasly, Yuki Tsunoda, Sebastian Vettel, Lance Stroll, George Russell, Nicholas Latifi, Kimi Räikkönen, Antonio Giovinazzi, Nikita Mazepin, Mick Schumacher"], ["2026", "Max Verstappen, Isack Hadjar, Lando Norris, Oscar Piastri, Charles Leclerc, Lewis Hamilton, George Russell, Andrea Kimi Antonelli, Fernando Alonso, Lance Stroll, Pierre Gasly, Franco Colapinto, Alexander Albon, Carlos Sainz, Nico Hulkenberg, Gabriel Bortoleto, Esteban Ocon, Oliver Bearman, Liam Lawson, Arvid Lindblad, Sergio Perez, Valtteri Bottas"]];
@@ -1156,6 +1216,7 @@
     guess.style.display = 'block';
     /* No autofocus on touch: the keyboard would cover the walking bar. */
     if (!isMobile) guess.focus();
+    syncCarets();
   }, 4000);
 
   guess.addEventListener('input', () => {
@@ -1164,6 +1225,7 @@
     if (v.length === 1 && n < 3) v = '';
     else if (v.length === 2 && (n < 30 || n > 90)) v = v.slice(0, 1);
     guess.value = v;
+    syncCarets();
   });
 
   guess.addEventListener('keydown', e => {
@@ -1174,6 +1236,7 @@
     howmanyPhase.style.display = 'none';
     guess.style.display = 'none';
     guess.blur();
+    syncCarets();
     clock.classList.remove('hidden');
     sprite.classList.remove('paused');
     running = true;
@@ -1232,6 +1295,7 @@
         signupPhase.style.display = 'block';
         syncRobotVisibility();
         if (!isMobile) email.focus();
+        syncCarets();
       }, 6000);
     };
     pausableTimeout(arrive, n * 1000);
@@ -1256,13 +1320,23 @@
     email.style.display = 'none';
     email.blur();
     syncRobotVisibility();
+    syncCarets();
     stepsEl.style.display = 'block';
     stepsWhite.style.display = 'block';
   });
 
   /* Typing the first character brings Rudy back onto the line; clearing
-     the field hides him again. */
-  email.addEventListener('input', syncRobotVisibility);
+     the field hides him again. The caret hint follows the same rule. */
+  email.addEventListener('input', () => {
+    syncRobotVisibility();
+    syncCarets();
+  });
+  /* Tapping into a field swaps the decorative bar for the native caret;
+     leaving it empty brings the bar back. */
+  [guess, email].forEach(field => {
+    field.addEventListener('focus', syncCarets);
+    field.addEventListener('blur', syncCarets);
+  });
 
   const words = document.querySelectorAll('.word');
   const aboutWord = document.querySelector('.word.about');
@@ -1558,6 +1632,7 @@
       sprite.style.top = '';
       stage.style.removeProperty('--line-h');
       [guess, email, result].forEach(el => { el.style.top = ''; });
+      syncCarets();
       return;
     }
     const top = walkingLine.offsetTop;
@@ -1570,6 +1645,7 @@
     sprite.style.top = (top + h - 64 - 52 * spriteK()) + 'px';
     const mid = top + h / 2;
     [guess, email, result].forEach(el => { el.style.top = mid + 'px'; });
+    syncCarets();
   };
   const relayout = () => {
     fitStage();
