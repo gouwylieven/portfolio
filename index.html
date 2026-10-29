@@ -479,6 +479,34 @@
     pointer-events: auto;
   }
 
+  /* Post-signup hand-over — same slot as the consent note, shown once
+     the address has been submitted. The download must not wait on an
+     email arriving, so the links live right here. */
+  .thanks {
+    position: absolute;
+    top: 871px;
+    left: 114px;
+    width: 1699px;
+    font-family: 'Microsoft Yi Baiti', sans-serif;
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 18px;
+    letter-spacing: 2px;
+    color: rgba(204, 174, 165, 0.85);
+    -webkit-text-stroke: 0;
+    text-align: right;
+    white-space: nowrap;
+    transform: scaleX(0.5964);
+    transform-origin: 100% 0;
+    display: none;
+    pointer-events: none;
+  }
+  .thanks a {
+    color: #d8a4a6;
+    pointer-events: auto;
+  }
+  .thanks a:hover { color: #ffffff; }
+
   /* Bot trap: a field no human can see or reach. A filled value
      means the signup came from a script, so it is dropped. */
   .hp {
@@ -935,6 +963,24 @@
     /* The consent note lives in the signup phase's text twin here;
        the desktop line has no slot on the column. */
     .consent { display: none !important; }
+    /* The hand-over line does fit, as a flow item under the bar. */
+    .thanks {
+      position: static;
+      order: 9;
+      width: 100%;
+      margin-top: 12px;
+      transform: none;
+      white-space: normal;
+      text-align: left;
+      font-family: 'Handjet', monospace;
+      font-variation-settings: 'ELSH' 16;
+      font-weight: 200;
+      font-size: clamp(17px, 4.7vw, 20px);
+      line-height: 1.35;
+      letter-spacing: 1px;
+      color: #e6d3ca;
+    }
+    .thanks a { color: #d8a4a6; }
     /* Bitmap phase lines swap to their text twins (see .phase above).
        Same LED face as the guess field / clock. The text sits 6 px
        under the walking line, mirroring the stepcounter's gap. */
@@ -1026,6 +1072,7 @@
     <div class="quote">The more things go on moving, interrelating, conflicting, the less balance there is and the more life. - U. K. Le Guin</div>
     <div class="quote quote-white" aria-hidden="true">The more things go on moving, interrelating, conflicting, the less balance there is and the more life. - U. K. Le Guin</div>
     <div id="consent" class="consent">By signing up you agree to receive occasional emails. Unsubscribe anytime &middot; <a href="privacy.html" target="_blank" rel="noopener">Privacy</a></div>
+    <div id="thanks" class="thanks">Got it &mdash; Rudy is yours. <a href="rudy-desktop/dist/Rudy.exe" download>Download for Windows</a> &middot; <a href="https://github.com/gouwylieven/portfolio/tree/main/rudy-desktop" target="_blank" rel="noopener">macOS</a></div>
     <div class="sprite"></div>
   </div>
   <input id="hp" class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" spellcheck="false">
@@ -1073,17 +1120,22 @@
   const email = document.getElementById('email');
   const hp = document.getElementById('hp');
   const consent = document.getElementById('consent');
+  const thanks = document.getElementById('thanks');
   /* Kit newsletter — the keyless public form endpoint. Only the UID is
      needed (from the form's embed code); it can add addresses but never
      read or delete them, so nothing secret ships in the page. While it
      is empty the signup is a silent no-op and the game still runs. */
   const KIT_FORM_UID = '10114432';
-  /* Consent note: only while the email field is up and no panel is
-     open, so it never lands on top of the quote or the project copy. */
+  /* Consent note and hand-over line share the quote's slot: the first
+     while the email field is up, the second once it has been
+     submitted. Both step aside when a panel is opened over them. */
+  let subscribed = false;
   const syncConsent = () => {
+    const panelOpen = !!document.querySelector('.word.active');
     consent.style.display =
-      !isMobile && email.style.display === 'block' &&
-      !document.querySelector('.word.active') ? 'block' : 'none';
+      !isMobile && !subscribed && email.style.display === 'block' && !panelOpen
+        ? 'block' : 'none';
+    thanks.style.display = subscribed && !panelOpen ? 'block' : 'none';
   };
   /* Form-encoded POST in no-cors mode is a "simple" request: no
      preflight, so the provider's CORS policy is irrelevant. The
@@ -1391,13 +1443,17 @@
     /* Native validity only: nothing over the network may gate the
        game, so a bad address just leaves the field up. */
     if (!address || (email.checkValidity && !email.checkValidity())) return;
+    /* The robot is handed over here, not by email: Kit's mail can be
+       slow, filtered, or gated behind account approval, and none of
+       that may stand between the visitor and the download. */
+    subscribed = true;
     subscribe(address);
     signupPhase.style.display = 'none';
-    consent.style.display = 'none';
     email.style.display = 'none';
     email.blur();
     syncRobotVisibility();
     syncCarets();
+    syncConsent();
     stepsEl.style.display = 'block';
     stepsWhite.style.display = 'block';
   });
