@@ -692,7 +692,7 @@
     .drive-desc, .eco-desc, .deadcert-desc {
       position: static;
       width: 100%;
-      order: 4;
+      order: 5;
       margin-top: 16px;
       font-family: 'Handjet', monospace;
       font-weight: 200;
@@ -712,23 +712,26 @@
     .deadcert-text-white, .deadcert-desc-white,
     .quote-white, .steps-white { display: none !important; }
 
-    /* Projects pager — the tall chevrons become two tap targets
-       under the artwork. */
+    /* Projects pager — the chevrons become two tap targets sitting
+       between the artwork and the description below it. Half the old
+       height, same width, so they take up less of the column. */
     .pager {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 30px;
-      order: 5;
+      order: 4;
       margin-top: 10px;
     }
     .toleft, .toright {
       position: static;
       width: 26px;
-      height: 96px;
-      padding: 0 19px;          /* 64x96 tap target */
+      height: 48px;             /* was 96 px */
+      padding: 0 19px;          /* 64x48 tap target, width unchanged */
       box-sizing: content-box;
-      object-fit: contain;
+      /* Fill instead of contain: halving the height must not shrink the
+         chevron's 26 px width along with it. */
+      object-fit: fill;
     }
 
     /* Contact icons: the artwork shrinks to the column width and the
@@ -778,7 +781,7 @@
          reads as a floor rather than a hairline; object-fit fills it. */
       aspect-ratio: 1699 / 208;
       object-fit: fill;
-      order: 6;
+      order: 7;
       /* Same 6 px gap the stepcounter keeps below the line, so the bar
          sits as close to the copy above it as the counter does. */
       margin-top: 6px;
@@ -815,7 +818,7 @@
        copied from the name text. */
     .steps {
       position: static;
-      order: 7;
+      order: 8;
       width: 100%;
       margin-top: 6px;
       font-family: 'Handjet', monospace;
@@ -852,7 +855,7 @@
       top: calc(6px + 10px - 6px);
       left: 0;                  /* clear the desktop 114 px offset */
       right: auto;
-      order: 5;
+      order: 6;
       width: 100%;
       margin-top: 18px;
       margin-bottom: 10px;
@@ -871,7 +874,7 @@
     /* Bitmap phase lines swap to their text twins (see .phase above).
        Same LED face as the guess field / clock. The text sits 6 px
        under the walking line, mirroring the stepcounter's gap. */
-    .phase { order: 7; margin-top: 6px; }
+    .phase { order: 8; margin-top: 6px; }
     .phase .howmany, .phase .congrats, .phase .signup { display: none; }
     .phase-text {
       display: block;
@@ -1466,6 +1469,27 @@
     if (!projectsWord.classList.contains('active')) return;
     showView((viewIndex + 2) % 3);
   });
+  /* Mobile: the projects panel is swipeable, same three views as the
+     chevrons. Only a clearly horizontal drag counts, so vertical page
+     scrolling and drags that start on a control are left alone. */
+  let swipeX = 0, swipeY = 0, swipeFrom = null;
+  stage.addEventListener('touchstart', e => {
+    const t = e.changedTouches[0];
+    swipeX = t.clientX;
+    swipeY = t.clientY;
+    swipeFrom = e.target;
+  }, { passive: true });
+  stage.addEventListener('touchend', e => {
+    if (!isMobile || !projectsWord.classList.contains('active')) return;
+    if (!swipeFrom || !swipeFrom.closest) return;
+    if (swipeFrom.closest('.word, .pager, input, a')) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - swipeX;
+    const dy = t.clientY - swipeY;
+    /* 40 px minimum, and the drag has to be mostly horizontal. */
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    showView(dx < 0 ? (viewIndex + 1) % 3 : (viewIndex + 2) % 3);
+  }, { passive: true });
   /* The quote is right-aligned and scaled on X to end at the WalkingLine's
      right edge (1813), 5 px right of the CONTACT word. The tuned 0.5964 in
      CSS assumes 'Microsoft Yi Baiti'; a fallback font (macOS, Linux, mobile)
