@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rudy — Lieven Gouwy</title>
+<link rel="canonical" href="https://gouwylieven.github.io/portfolio/rudy.html">
+<meta name="description" content="Download Rudy, the little black robot who walks the WalkingLine on this site, for your own desktop.">
+<style>
+  @font-face {
+    font-family: 'Handjet';
+    src: url('fonts/handjet-variable.woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000000;
+    color: #e6d3ca;
+    font-family: 'Handjet', monospace;
+    font-weight: 200;
+    font-size: 20px;
+    line-height: 1.55;
+    letter-spacing: 1px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 56px 20px 96px;
+  }
+
+  h1 {
+    font-weight: 200;
+    font-size: 44px;
+    line-height: 1.1;
+    letter-spacing: 2px;
+    color: rgba(204, 174, 165, 0.95);
+    margin-bottom: 4px;
+  }
+
+  .sub {
+    font-size: 17px;
+    color: rgba(150, 136, 127, 0.9);
+    margin-bottom: 34px;
+  }
+
+  h2 {
+    font-weight: 400;
+    font-size: 24px;
+    letter-spacing: 1px;
+    color: #ffffff;
+    margin: 36px 0 8px;
+  }
+
+  a { color: #d8a4a6; }
+  a:hover { color: #ffffff; }
+
+  .btn {
+    display: inline-block;
+    margin: 10px 0 4px;
+    padding: 12px 22px;
+    border: 1px solid rgba(216, 164, 166, 0.6);
+    border-radius: 8px;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: #e6d3ca;
+    text-decoration: none;
+  }
+  .btn:hover {
+    border-color: #c1d97c;
+    color: #ffffff;
+  }
+  .meta {
+    display: block;
+    font-size: 15px;
+    color: rgba(150, 136, 127, 0.9);
+    margin-top: 6px;
+  }
+
+  .note {
+    margin-top: 22px;
+    padding: 16px 18px;
+    border-left: 2px solid #c1d97c;
+    background: rgba(193, 217, 124, 0.05);
+    font-size: 18px;
+  }
+
+  ol, ul { list-style: none; counter-reset: step; }
+  li {
+    position: relative;
+    padding-left: 26px;
+    margin-bottom: 6px;
+  }
+  ol li::before {
+    counter-increment: step;
+    content: counter(step) '.';
+    position: absolute;
+    left: 0;
+    color: #c1d97c;
+  }
+  ul li::before {
+    content: '·';
+    position: absolute;
+    left: 6px;
+    color: #c1d97c;
+  }
+
+  code {
+    font-family: Consolas, monospace;
+    font-size: 15px;
+    color: #c1d97c;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  pre {
+    margin: 10px 0 4px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    overflow-x: auto;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #e6d3ca;
+  }
+
+  .back {
+    display: inline-block;
+    margin-top: 44px;
+    font-size: 18px;
+    color: rgba(204, 174, 165, 0.8);
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Rudy</h1>
+  <p class="sub">The little black robot who walks the WalkingLine, cut loose
+  from the browser.</p>
+
+  <p>One file. No installer, no runtime, no background service. He draws
+  himself on top of other windows, walks back and forth in 60 seconds per
+  crossing, and never touches the network, the registry or your files.
+  Click him to pause, double-click to quit.</p>
+
+  <h2>Windows 10 / 11</h2>
+  <a class="btn" href="rudy-desktop/dist/Rudy.exe" download>Download Rudy.exe</a>
+  <span class="meta">79 KB &middot; .NET Framework 4.8, already part of Windows</span>
+
+  <div class="note">
+    <strong>Windows may call it suspicious.</strong> The build is unsigned —
+    a code-signing certificate costs money and this is a free toy — so
+    SmartScreen and browsers treat a 79&nbsp;KB executable nobody has
+    downloaded before with suspicion. Nothing is wrong with the file, and you
+    do not have to take my word for it: the full source is
+    <a href="https://github.com/gouwylieven/portfolio/tree/main/rudy-desktop" target="_blank" rel="noopener">on GitHub</a>,
+    or you can build it yourself in ten seconds (below).
+
+    <ol style="margin-top:12px">
+      <li><strong>Chrome:</strong> the download bubble says the file was
+      blocked or is suspicious — open <code>Ctrl+J</code>, find Rudy.exe,
+      click the arrow next to it and choose <em>Keep</em>.</li>
+      <li><strong>Edge:</strong> in the Downloads panel, open the
+      <code>&middot;&middot;&middot;</code> menu on Rudy.exe and choose
+      <em>Keep</em>.</li>
+      <li><strong>On first run</strong> Windows may show <em>Windows
+      protected your PC</em> — click <em>More info</em>, then
+      <em>Run anyway</em>.</li>
+    </ol>
+  </div>
+
+  <h2>Build it yourself</h2>
+  <p>The C# compiler ships inside Windows, so there is no SDK to install.
+  Clone the repository and run one script:</p>
+  <pre><code>git clone https://github.com/gouwylieven/portfolio.git
+cd portfolio
+powershell -ExecutionPolicy Bypass -File rudy-desktop\win\build.ps1</code></pre>
+  <p class="meta">Then run <code>rudy-desktop\dist\Rudy.exe</code>. A locally
+  compiled copy carries no download mark, so none of the warnings above
+  appear.</p>
+
+  <h2>macOS 11+</h2>
+  <p>There is no prebuilt <code>.app</code>, because the bundle is built and
+  ad-hoc signed by Xcode's compiler on your machine. With the Xcode Command
+  Line Tools installed:</p>
+  <pre><code>git clone https://github.com/gouwylieven/portfolio.git
+cd portfolio/rudy-desktop/mac
+./build.sh</code></pre>
+  <p class="meta">That produces <code>dist/Rudy.app</code>.</p>
+
+  <h2>What he never does</h2>
+  <ul>
+    <li>No network access of any kind — no sockets, no telemetry, no update check.</li>
+    <li>No files read or written except his own embedded sprite.</li>
+    <li>No registry keys, login items or startup entries; no admin rights.</li>
+    <li>No keystroke hooks, no window inspection, no screen recording.</li>
+    <li>Nothing left running after you quit him.</li>
+  </ul>
+
+  <a class="back" href="./">&larr; Back to the site</a>
+</main>
+</body>
+</html>
