@@ -1091,15 +1091,21 @@
      sends is the verification, and a network failure must never
      interrupt the walk. */
   const subscribe = address => {
-    if (!KIT_FORM_UID) return;
+    if (!KIT_FORM_UID) {
+      console.warn('[newsletter] KIT_FORM_UID is empty — nothing was sent.');
+      return;
+    }
     if (hp.value !== '') return;
     fetch(`https://app.kit.com/forms/${KIT_FORM_UID}/subscriptions`, {
       method: 'POST',
-      mode: 'no-cors',
+      mode: 'cors',
       headers: { Accept: 'application/json' },
       body: new URLSearchParams({ email_address: address }),
       keepalive: true
-    }).catch(() => {});
+    })
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status))))
+      .then(j => console.info('[newsletter] subscribed:', address, j.status))
+      .catch(err => console.warn('[newsletter] subscribe failed:', err));
   };
   /* Mobile only: the email field covers most of the walking line, so
      Rudy stays hidden while that field is up and still empty. As soon
