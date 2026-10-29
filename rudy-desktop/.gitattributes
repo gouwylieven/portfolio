@@ -1,0 +1,13 @@
+# The macOS build is a shell script; it must keep LF endings to run.
+*.sh    text eol=lf
+*.swift text eol=lf
+*.plist text eol=lf
+
+# PowerShell and C# are edited on Windows.
+*.ps1   text eol=crlf
+*.cs    text eol=crlf
+
+# Binary art / icons: never touch these.
+*.png   binary
+*.ico   binary
+*.exe   binary
