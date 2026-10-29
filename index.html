@@ -449,36 +449,6 @@
     display: none;
   }
 
-  /* Newsletter consent line — sits in the quote's slot above the
-     WalkingLine (871) while the email field is up. Same face and
-     muted colour as the quote, right-aligned to the line's right
-     bound (1813). Only shown when no panel is open, so it can never
-     collide with the quote or the project copy. */
-  .consent {
-    position: absolute;
-    top: 871px;
-    left: 114px;
-    width: 1699px;
-    font-family: 'Microsoft Yi Baiti', sans-serif;
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 18px;
-    letter-spacing: 2px;
-    color: rgba(96, 87, 80, 0.2);
-    -webkit-text-stroke: 1px rgba(96, 87, 80, 0.8);
-    text-align: right;
-    white-space: nowrap;
-    transform: scaleX(0.5964);
-    transform-origin: 100% 0;
-    display: none;
-    /* The line is transparent to clicks, its link is not. */
-    pointer-events: none;
-  }
-  .consent a {
-    color: inherit;
-    pointer-events: auto;
-  }
-
   /* Bot trap: a field no human can see or reach. A filled value
      means the signup came from a script, so it is dropped. */
   .hp {
@@ -932,9 +902,6 @@
       color: rgba(204, 174, 165, 0.8);
       -webkit-text-stroke: 0;
     }
-    /* The consent note lives in the signup phase's text twin here;
-       the desktop line has no slot on the column. */
-    .consent { display: none !important; }
     /* Bitmap phase lines swap to their text twins (see .phase above).
        Same LED face as the guess field / clock. The text sits 6 px
        under the walking line, mirroring the stepcounter's gap. */
@@ -1009,7 +976,7 @@
     </div>
     <div id="signupPhase" class="phase">
       <img class="signup" src="Texts/Signup.webp" alt="Signup">
-      <p class="phase-text">Sign up for our newsletter and get Rudy walking on your desktop! By signing up you agree to receive occasional emails &mdash; unsubscribe anytime.</p>
+      <p class="phase-text">Sign up for our newsletter and get Rudy walking on your desktop!</p>
     </div>
     <div id="howmanyPhase" class="phase">
       <img class="howmany" src="Texts/HowManySeconds.webp" alt="How many seconds do you think it will take Rudy to cross the screen">
@@ -1025,7 +992,6 @@
     <div class="steps steps-white" aria-hidden="true">Rudy's stepcounter: 1</div>
     <div class="quote">The more things go on moving, interrelating, conflicting, the less balance there is and the more life. - U. K. Le Guin</div>
     <div class="quote quote-white" aria-hidden="true">The more things go on moving, interrelating, conflicting, the less balance there is and the more life. - U. K. Le Guin</div>
-    <div id="consent" class="consent">By signing up you agree to receive occasional emails. Unsubscribe anytime &middot; <a href="privacy.html" target="_blank" rel="noopener">Privacy</a></div>
     <div class="sprite"></div>
   </div>
   <input id="hp" class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" spellcheck="false">
@@ -1072,21 +1038,11 @@
   const result = document.getElementById('result');
   const email = document.getElementById('email');
   const hp = document.getElementById('hp');
-  const consent = document.getElementById('consent');
   /* Kit newsletter — the keyless public form endpoint. Only the UID is
      needed (from the form's embed code); it can add addresses but never
      read or delete them, so nothing secret ships in the page. While it
      is empty the signup is a silent no-op and the game still runs. */
   const KIT_FORM_UID = '10114432';
-  /* Consent note: only while the email field is up and no panel is
-     open, so it never lands on top of the quote or the project copy.
-     The download itself arrives by email (Kit's confirmation), so the
-     page hands nothing over after submit. */
-  const syncConsent = () => {
-    consent.style.display =
-      !isMobile && email.style.display === 'block' &&
-      !document.querySelector('.word.active') ? 'block' : 'none';
-  };
   /* Form-encoded POST in no-cors mode is a "simple" request: no
      preflight, so the provider's CORS policy is irrelevant. The
      response is unreadable by design — the double opt-in mail Kit
@@ -1369,7 +1325,6 @@
         email.style.display = 'block';
         signupPhase.style.display = 'block';
         syncRobotVisibility();
-        syncConsent();
         if (!isMobile) email.focus();
         syncCarets();
       }, 6000);
@@ -1401,7 +1356,6 @@
     email.blur();
     syncRobotVisibility();
     syncCarets();
-    syncConsent();
     stepsEl.style.display = 'block';
     stepsWhite.style.display = 'block';
   });
@@ -1735,7 +1689,6 @@
     layoutBar();
     fitQuote();
     syncRobotVisibility();
-    syncConsent();
   };
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(relayout);
@@ -1779,8 +1732,6 @@
       /* The panel changes the height of the column, and the walking bar
          sits below it: re-anchor Rudy and the fields. */
       layoutBar();
-      /* A panel would sit exactly on the consent line. */
-      syncConsent();
       /* On a phone the panel opens below three word buttons, so bring
          it into view rather than leaving the visitor on the buttons. */
       if (isMobile && !wasActive) scrollPanelIntoView();
