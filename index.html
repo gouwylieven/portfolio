@@ -859,8 +859,9 @@
       -webkit-text-stroke: 0;
     }
     /* Bitmap phase lines swap to their text twins (see .phase above).
-       Same LED face as the guess field / clock. */
-    .phase { order: 7; margin-top: 16px; }
+       Same LED face as the guess field / clock. The text sits 6 px
+       under the walking line, mirroring the stepcounter's gap. */
+    .phase { order: 7; margin-top: 6px; }
     .phase .howmany, .phase .congrats, .phase .signup { display: none; }
     .phase-text {
       display: block;
