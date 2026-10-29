@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lieven Gouwy</title>
+<link rel="canonical" href="https://gouwylieven.github.io/portfolio/">
+<meta property="og:url" content="https://gouwylieven.github.io/portfolio/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lieven Gouwy">
+<meta name="twitter:card" content="summary">
 <link rel="preload" as="image" href="Texts/AboutWhite.webp">
 <link rel="preload" as="image" href="Texts/ProjectsWhite.webp">
 <link rel="preload" as="image" href="Texts/ConctactWhite.webp">
@@ -32,6 +37,10 @@
   body {
     background: #000000;
     overflow: hidden;
+    /* Stop mobile browsers from inflating the fixed-px text, which
+       would reflow the 1920x1080 composition. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   /* 1920x1080 composition, scaled down to fit the window and centered
@@ -109,9 +118,15 @@
     left: 847px;
     width: 966px;
     height: 752px;
-    display: none;
     opacity: 0.95;
   }
+
+  /* The About copy is a 926 px-wide bitmap: at phone width it would be
+     ~8 px type, so the mobile layout shows this text twin instead. The
+     desktop panel is a static wrapper around the absolutely positioned
+     artwork, so wrapping it changes nothing there. */
+  .mobile-panel { display: none; }
+  .asan-text { display: none; }
 
   /* Drive — visible with the projects toggle. Same middle point as
      Asan (1330, 519): the Asan box (847, 143, 966x752) scaled by 0.7.
@@ -248,7 +263,7 @@
   }
 
   @keyframes names-scroll {
-    from { transform: translateX(676px); }
+    from { transform: translateX(var(--names-start, 676px)); }
     to   { transform: translateX(-100%); }
   }
 
@@ -292,8 +307,10 @@
   }
 
   /* Drive / Ecociv / DeadCert description — same font/settings as the tagline, visible
-      with the projects toggle. Top-anchored at y=732; ink left/right
-      aligned with the Drive edges the same way as the tagline. */
+      with the projects toggle. Normally top-anchored at y=732; the layout
+      script lifts it when the visitor's font wraps it to more lines so its
+      last line always stays 18 px above the WalkingLine (900 - 18 = 882).
+      Ink left/right aligned with the Drive edges the same way as the tagline. */
   .drive-desc, .eco-desc, .deadcert-desc {
     position: absolute;
     left: 702px;
@@ -470,7 +487,6 @@
     left: 114px;
     width: 1699px;
     height: 61px;
-    display: none;
   }
 
   /* Congrats — shown when Rudy reaches the left bound.
@@ -482,7 +498,6 @@
     left: 114px;
     width: 1699px;
     height: 61px;
-    display: none;
   }
 
   /* Signup — shown with the email input.
@@ -493,8 +508,15 @@
     left: 114px;
     width: 1699px;
     height: 61px;
-    display: none;
   }
+
+  /* The three bitmap lines above are 1699 px wide single rows: at phone
+     width they would be ~13 px tall, so each lives in a .phase wrapper
+     next to a real-text twin. The wrapper is static (its bitmap child
+     keeps its stage coordinates) and hidden until JS shows it; the text
+     twin only appears in the mobile layout. */
+  .phase { display: none; }
+  .phase-text { display: none; }
 
   .clock.hidden { visibility: hidden; }
   .sprite.paused, .sprite.page-hidden { animation-play-state: paused; }
@@ -574,6 +596,235 @@
     from { background-position-x: 0; }
     to   { background-position-x: -768px; }
   }
+
+  /* ─── Mobile / narrow screens ────────────────────────────────────
+     Everything above composes a fixed 1920x1080 canvas. On a phone the
+     fit-to-window scale would shrink that to roughly a 390x219 strip,
+     so under 900 px the stage stops being a canvas and becomes a normal
+     vertical document: name, the three word buttons, the active panel,
+     then the walking bar. Desktop rules are untouched — this block only
+     overrides them; the query must match MOBILE_QUERY in the script.
+     Landscape phones keep the scaled canvas: it fits at ~0.36 and the
+     reflowed column would need two screens of scrolling just for the
+     three word buttons. */
+  @media (max-width: 900px) and (orientation: portrait) {
+    html, body { overflow-x: hidden; overflow-y: auto; }
+
+    .stage {
+      position: relative;
+      top: auto;
+      left: auto;
+      width: 100%;
+      height: auto;
+      min-height: 100dvh;
+      overflow: visible;
+      transform: none !important;
+      display: flex;
+      flex-direction: column;
+      padding: 22px 16px 30px;
+    }
+
+    /* Name + role. The white twin only lifts the contrast of the 0.2
+       alpha fill on the dark stage, so mobile uses a single, stronger
+       outline instead of stacking two layers. */
+    .header {
+      position: static;
+      font-size: clamp(26px, 8.4vw, 44px);
+      line-height: 1.08;
+      white-space: normal;
+      transform: none;
+      color: rgba(96, 87, 80, 0.3);
+      -webkit-text-stroke: 1px rgba(150, 136, 127, 0.9);
+    }
+    .header-white { display: none; }
+
+    /* ABOUT / PROJECTS / CONTACT — same 728x246 artwork, full width.
+       relative (not static) so the white overlay stays glued to its
+       own word instead of filling the stage. */
+    .word {
+      position: relative;
+      flex: none;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 728 / 246;
+      margin-top: 8px;
+      order: 1;
+    }
+    .word img { width: 100%; height: 100%; }
+    /* The desktop left/top offsets (114, 143/394/645) would shift these
+       relative boxes without affecting the flow. */
+    .word.about, .word.projects, .word.contact { left: 0; top: 0; }
+
+    /* Active panel: tagline, artwork, description — stacked and
+       re-flowed at real font sizes instead of being absolutely placed
+       inside the 1920 composition. */
+    .asan, .drive, .eco, .deadcert {
+      position: static;
+      width: 100%;
+      height: auto;
+      order: 3;
+      margin-top: 16px;
+    }
+    .drive-text, .eco-text, .deadcert-text {
+      position: static;
+      width: 100%;
+      order: 2;
+      margin-top: 18px;
+      font-size: clamp(16px, 4.6vw, 20px);
+      line-height: 1.42;
+      letter-spacing: 0;
+      text-align: left;
+      transform: none;
+      color: #ffffff;
+      opacity: 1;
+    }
+    .drive-desc, .eco-desc, .deadcert-desc {
+      position: static;
+      width: 100%;
+      order: 4;
+      margin-top: 16px;
+      font-size: clamp(15px, 4.3vw, 18px);
+      line-height: 1.45;
+      letter-spacing: 0;
+      text-align: left;
+      transform: none;
+      color: #ccaea5;
+      opacity: 1;
+    }
+    /* The white twins would duplicate every line of copy in the flow. */
+    .drive-text-white, .drive-desc-white,
+    .eco-text-white, .eco-desc-white,
+    .deadcert-text-white, .deadcert-desc-white,
+    .quote-white, .steps-white { display: none !important; }
+
+    /* Projects pager — the tall chevrons become two tap targets
+       under the artwork. */
+    .pager {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      order: 5;
+      margin-top: 10px;
+    }
+    .toleft, .toright {
+      position: static;
+      width: 26px;
+      height: 96px;
+      padding: 0 19px;          /* 64x96 tap target */
+      box-sizing: content-box;
+      object-fit: contain;
+    }
+
+    /* Contact icons. */
+    .links {
+      position: static;
+      height: auto;
+      order: 2;
+      margin-top: 18px;
+      justify-content: flex-start;
+    }
+    .links img { width: 100%; height: auto; }
+
+    /* About copy: text twin instead of the bitmap. */
+    #aboutPanel { order: 3; margin-top: 18px; }
+    .asan { display: none; }
+    .asan-text { display: block; }
+    .asan-text p {
+      font-family: 'Microsoft Yi Baiti', sans-serif;
+      font-size: clamp(15px, 4.3vw, 18px);
+      line-height: 1.5;
+      letter-spacing: 0;
+      color: #e6dcd7;
+    }
+    .asan-text strong { font-weight: 400; color: #ffffff; }
+    .hl-pink { color: #b0677c; }
+    .hl-green { color: #8b9c46; }
+
+    /* Walking bar. The line is a full-width flow item; everything that
+       rides on it (Rudy, the fields) is positioned by layoutBar(). */
+    .walkingline {
+      position: static;
+      width: 100%;
+      height: auto;
+      order: 6;
+      margin-top: 96px;         /* headroom for Rudy's body */
+    }
+    .sprite { top: 0; }         /* layoutBar() sets the real value */
+
+    .guess, .email, .result {
+      top: 0;                   /* layoutBar() centers it on the line */
+      left: 8%;
+      width: 84%;
+      height: 54px;
+      line-height: 54px;
+      font-size: 26px;
+      border-radius: 8px;
+      transform: translateY(-50%);
+      /* The line is a pale bar at this width, so the field needs its
+         own contrast instead of the desktop's translucent black. */
+      background: rgba(0, 0, 0, 0.78);
+      box-shadow: inset 0 0 0 1px rgba(204, 174, 165, 0.35);
+      color: #e6d3ca;
+    }
+    .email, .result { font-size: 21px; }
+    .guess::placeholder, .email::placeholder {
+      font-size: 19px;
+      color: rgba(204, 174, 165, 0.95);
+    }
+
+    .clock {
+      position: static;
+      order: 7;
+      margin-top: 16px;
+      text-align: center;
+      font-size: 34px;
+    }
+
+    /* Quote sits above the WalkingLine like on the desktop; the step
+       counter, clock and phase lines sit under it. */
+    .quote {
+      position: static;
+      order: 5;
+      width: 100%;
+      margin-top: 18px;
+      margin-bottom: 10px;
+      font-size: clamp(14px, 4vw, 17px);
+      line-height: 1.45;
+      letter-spacing: 0;
+      white-space: normal;
+      text-align: left;
+      transform: none;
+      color: rgba(204, 174, 165, 0.8);
+      -webkit-text-stroke: 0;
+    }
+    .steps {
+      position: static;
+      order: 7;
+      width: 100%;
+      margin-top: 14px;
+      font-size: clamp(14px, 4vw, 17px);
+      line-height: 1.45;
+      letter-spacing: 0;
+      white-space: normal;
+      text-align: left;
+      transform: none;
+      color: rgba(204, 174, 165, 0.8);
+      -webkit-text-stroke: 0;
+    }
+
+    /* Bitmap phase lines swap to their text twins (see .phase above). */
+    .phase { order: 7; margin-top: 16px; }
+    .phase .howmany, .phase .congrats, .phase .signup { display: none; }
+    .phase-text {
+      display: block;
+      font-family: 'Microsoft Yi Baiti', sans-serif;
+      font-size: clamp(17px, 5vw, 22px);
+      line-height: 1.3;
+      letter-spacing: 0.5px;
+      color: #ccaea5;
+    }
+  }
 </style>
 </head>
 <body>
@@ -593,12 +844,19 @@
       <img class="white" src="Texts/ConctactWhite.webp" alt="">
     </div>
     <img class="walkingline" src="Texts/WalkingLine.webp" alt="">
-    <img class="asan" src="Texts/Asan.webp" alt="Asan">
+    <div id="aboutPanel" class="mobile-panel">
+      <img class="asan" src="Texts/Asan.webp" alt="About">
+      <div class="asan-text">
+        <p>As a professionally trained musician I always had a feel for the system of things, the systematic, and from there, the system of play, the ludic. Being intrigued by how the relationship between pre-established structural elements and personal input or improvisation becomes so engaging, formed my initial introduction to game design. A feeling of personal impact intertwined with feelings of progress instigating <span class="hl-pink">the desire to return</span>. Working on art projects as a professional photographer and living in different countries, I learned to look at the world as a non-related sequence of self-imposed frames. I learned to translate observations —a specific, coincidental coming together of reality— into images, and started to see the link between the objective world (how the world presents itself), memory (our personal relation to it), and story (how we mold reality into our own theatre). <span class="hl-pink">Funny thing I am now inverting that direction.</span> Where I used to move from experience to screen, I now move from screen to experience, bringing with me a <strong>lasting affinity for the asymmetrical, the analogue, the imperfect, and the stuttering.</strong> As an avid reader and solution thinker I learned to value <span class="hl-pink">attention to detail, depth, and interconnectedness of gameplay elements</span>—where rules, <span class="hl-green">deep gameplay mechanics, and player choices function as an integrated ecosystem.</span> Although there is nothing greater than a good scripted plot, it is still the deliberate moments of particular details that trigger both the mind and the heart. <span class="hl-pink">As a human driven by sustainability</span> and equality, you can expect me to weave a quiet <span class="hl-green">system of values</span> into the architecture.</p>
+      </div>
+    </div>
     <img class="drive" src="Texts/Drive.webp" alt="Drive">
     <div class="pointnude-shadow"></div>
     <img class="pointnude" src="Texts/PointNude.webp" alt="">
-    <img class="toleft" src="Texts/ToLeft.webp" alt="">
-    <img class="toright" src="Texts/ToRight.webp" alt="">
+    <div class="pager">
+      <img class="toleft" src="Texts/ToLeft.webp" alt="Previous project">
+      <img class="toright" src="Texts/ToRight.webp" alt="Next project">
+    </div>
     <img class="eco" src="Texts/ecocivgreen.webp" alt="Ecociv">
     <div class="eco-text">Inspired by Jeremy Lent's <i>Ecocivilization</i> and U.K. Le Guin's <i>The Dispossessed</i> and <i>Eye of the Heron</i>, you are the child of the Leader of The City, a rigid capitalist oligarchy, controlled by violence and built on extraction and exploitation. Through an extraordinary encounter you catch a glimpse of who lives on what you always believed to simply be the Moon. From then on nothing will ever be the same again.</div>
     <div class="eco-text eco-text-white" aria-hidden="true">Inspired by Jeremy Lent's <i>Ecocivilization</i> and U.K. Le Guin's <i>The Dispossessed</i> and <i>Eye of the Heron</i>, you are the child of the Leader of The City, a rigid capitalist oligarchy, controlled by violence and built on extraction and exploitation. Through an extraordinary encounter you catch a glimpse of who lives on what you always believed to simply be the Moon. From then on nothing will ever be the same again.</div>
@@ -619,9 +877,18 @@
     <div class="drive-desc drive-desc-white" aria-hidden="true">
 		<i>DRIVE</i> is an android 2D a-synchronous competition car collecting game developed in Unity. Centered on deep gameplay and an evolving ever expanding world where systems are interconnected and all actions have consequences. Play anywhere on earth. Every street name, town, and city layout is an exact match to the real world.</div>
     <div class="links"><div class="links-inner"><img src="Texts/mail-insta-linkedrecolor.webp" alt="Mail, Instagram, LinkedIn, Discord"><a class="link-btn mail" href="mailto:gouwylieven@yahoo.com" aria-label="Email"></a><a class="link-btn insta" href="https://instagram.com/gouwylieven" target="_blank" rel="noopener" aria-label="Instagram"></a><a class="link-btn linked" href="https://www.linkedin.com/in/lieven-gouwy-43342138b/" target="_blank" rel="noopener" aria-label="LinkedIn"></a><a class="link-btn discord" href="https://discord.gg/ZEFcwcfq6A" target="_blank" rel="noopener" aria-label="Discord"></a></div></div>
-    <img class="congrats" src="Texts/Congrats.webp" alt="Congrats">
-    <img class="signup" src="Texts/Signup.webp" alt="Signup">
-    <img class="howmany" src="Texts/HowManySeconds.webp" alt="How many seconds do you think it will take Rudy to cross the screen">
+    <div id="congratsPhase" class="phase">
+      <img class="congrats" src="Texts/Congrats.webp" alt="Congrats">
+      <p class="phase-text">Congrats, you are the very first ever to get this completely right!!!</p>
+    </div>
+    <div id="signupPhase" class="phase">
+      <img class="signup" src="Texts/Signup.webp" alt="Signup">
+      <p class="phase-text">Sign up for our newsletter and get Rudy walking on your desktop!</p>
+    </div>
+    <div id="howmanyPhase" class="phase">
+      <img class="howmany" src="Texts/HowManySeconds.webp" alt="How many seconds do you think it will take Rudy to cross the screen">
+      <p class="phase-text">How many seconds do you think it will take Rudy to cross the screen?</p>
+    </div>
     <input id="guess" class="guess" type="text" inputmode="numeric" maxlength="2" autocomplete="off" spellcheck="false" placeholder="30-90" aria-label="Your guess in seconds">
     <div id="result" class="result" aria-live="polite"></div>
     <input id="email" class="email" type="email" name="no-autocomplete-email" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Email Address..." aria-label="Email address">
@@ -634,8 +901,29 @@
   </div>
 <script>
   const stage = document.querySelector('.stage');
+  const walkingLine = document.querySelector('.walkingline');
+  /* Below this width the CSS switches to the reflowed column layout
+     (see the @media block); JS uses the same query so both stay in
+     sync. Landscape phones keep the scaled canvas. */
+  const MOBILE_QUERY = window.matchMedia('(max-width: 900px) and (orientation: portrait)');
+  let isMobile = MOBILE_QUERY.matches;
+  let stageScale = 1;
   function fitStage() {
-    const s = Math.min(1600 / 1920, window.innerWidth / 1920, window.innerHeight / 1080);
+    /* clientWidth/Height instead of innerWidth/Height: on mobile
+       browsers innerWidth can report an expanded layout viewport while
+       the visible area stays device-width, which would crop the stage. */
+    const vw = document.documentElement.clientWidth || window.innerWidth;
+    const vh = document.documentElement.clientHeight || window.innerHeight;
+    isMobile = MOBILE_QUERY.matches;
+    if (isMobile) {
+      /* No canvas on phones: the stage is a plain column, so there is
+         nothing to scale. */
+      stageScale = 1;
+      stage.style.transform = 'none';
+      return;
+    }
+    const s = Math.min(1600 / 1920, vw / 1920, vh / 1080);
+    stageScale = s;
     stage.style.transform = `translate(-50%, -50%) scale(${s})`;
   }
   window.addEventListener('resize', fitStage);
@@ -647,9 +935,9 @@
   const stepsWhite = document.querySelector('.steps-white');
   const quoteEl = document.querySelector('.quote');
   const quoteWhite = document.querySelector('.quote-white');
-  const howmany = document.querySelector('.howmany');
-  const congrats = document.querySelector('.congrats');
-  const signup = document.querySelector('.signup');
+  const howmanyPhase = document.getElementById('howmanyPhase');
+  const congratsPhase = document.getElementById('congratsPhase');
+  const signupPhase = document.getElementById('signupPhase');
   const guess = document.getElementById('guess');
   const result = document.getElementById('result');
   const email = document.getElementById('email');
@@ -681,15 +969,33 @@
   /* JS-driven patrol (replaces the old CSS `walk` keyframes) so a
      visible input field acts as an extra bound: the sprite flips
      when its drawn edge (16 px inside the 128 px cell) hits the
-     field instead of crossing it. */
-  const LEFT_TX = 98, RIGHT_TX = 1699;
-  const BASE_SPEED = (RIGHT_TX - LEFT_TX) / 60;
+     field instead of crossing it.
+     The patrol bounds come from the WalkingLine element rather than
+     hard-coded numbers: desktop still yields the original 98 / 1699
+     (98 + 16 px of cell padding = the line's left edge at 114), and
+     the mobile column — where the line is simply full width — gets
+     bounds that fit it. */
+  const spriteK = () => (isMobile ? 0.7 : 1);
+  let LEFT_TX = 98, RIGHT_TX = 1699;
+  let BASE_SPEED = (RIGHT_TX - LEFT_TX) / 60;
+  const updatePatrolBounds = () => {
+    const k = spriteK();
+    /* Scaling the sprite about its centre insets the drawn box by this
+       much on both sides; the hit tests need the same offset. */
+    const pad = 64 * (1 - k);
+    const l = walkingLine.offsetLeft;
+    const w = walkingLine.offsetWidth || 1699;
+    LEFT_TX = l - 16 * k - pad;
+    RIGHT_TX = l + w - 2 * k - 112 * k - pad;
+    BASE_SPEED = (RIGHT_TX - LEFT_TX) / 60;
+  };
   /* Base walk-cycle speed (free patrol + email phase). Changing this
      does NOT affect the pinned 30 s / 90 s guess rates below. */
   const BASE_LOOP = 1.1027;
   let pos = RIGHT_TX, dir = -1, rate = 1, running = true;
   const render = () => {
-    sprite.style.transform = `translateX(${pos}px) scaleX(${dir < 0 ? 1 : -1})`;
+    sprite.style.transform =
+      `translateX(${pos}px) scaleX(${dir < 0 ? 1 : -1}) scale(${spriteK()})`;
   };
   render();
   const getPlayAnim = () => sprite.getAnimations().find(a => a.animationName === 'play');
@@ -705,11 +1011,12 @@
     if (dt > 0.05) dt = 0.05;
     if (pageHidden) { requestAnimationFrame(moveLoop); return; }
     if (running) {
+      const k = spriteK(), pad = 64 * (1 - k);
       let min = LEFT_TX, max = RIGHT_TX;
       const ob = visibleObstacle();
       if (ob) {
         const L = ob.offsetLeft, R = ob.offsetLeft + ob.offsetWidth;
-        const leftStop = L - 112, rightStop = R - 16;
+        const leftStop = L - 112 * k - pad, rightStop = R - 16 * k - pad;
         if (pos > leftStop && pos < rightStop) {
           pos = (pos + 64 < (L + R) / 2) ? leftStop : rightStop;
         }
@@ -764,16 +1071,22 @@
     }
   };
   document.addEventListener('visibilitychange', () => setPageHidden(document.hidden));
-  window.addEventListener('blur', () => setPageHidden(true));
-  window.addEventListener('focus', () => { if (!document.hidden) setPageHidden(false); });
+  /* window blur/focus are only reliable pause signals on desktop; on
+     phones they also fire when the URL bar or the soft keyboard is
+     touched, which would freeze Rudy mid-stride. */
+  window.addEventListener('blur', () => { if (!isMobile) setPageHidden(true); });
+  window.addEventListener('focus', () => {
+    if (!isMobile && !document.hidden) setPageHidden(false);
+  });
 
   pausableTimeout(() => {
     running = false;
     sprite.classList.add('paused');
     clock.classList.add('hidden');
-    howmany.style.display = 'block';
+    howmanyPhase.style.display = 'block';
     guess.style.display = 'block';
-    guess.focus();
+    /* No autofocus on touch: the keyboard would cover the walking bar. */
+    if (!isMobile) guess.focus();
   }, 4000);
 
   guess.addEventListener('input', () => {
@@ -789,7 +1102,7 @@
     const n = parseInt(guess.value, 10);
     if (!Number.isInteger(n) || n < 30 || n > 90) return;
     guessedSeconds = n;
-    howmany.style.display = 'none';
+    howmanyPhase.style.display = 'none';
     guess.style.display = 'none';
     guess.blur();
     clock.classList.remove('hidden');
@@ -830,7 +1143,7 @@
       clock.classList.add('hidden');
       stepsEl.style.display = 'none';
       stepsWhite.style.display = 'none';
-      congrats.style.display = 'block';
+      congratsPhase.style.display = 'block';
       /* Show the visitor's guess + a random hundredths value
          (e.g. guess 30 -> "30.36 seconds!") centered on the
          WalkingLine with the same background as the time input. */
@@ -840,7 +1153,7 @@
       /* Restart after 6 s at base speed; the flip happens then.
          The visible email field acts as a bound from here on. */
       pausableTimeout(() => {
-        congrats.style.display = 'none';
+        congratsPhase.style.display = 'none';
         result.style.display = 'none';
         rate = 1;
         const pa = getPlayAnim();
@@ -848,8 +1161,8 @@
         running = true;
         sprite.classList.remove('paused');
         email.style.display = 'block';
-        signup.style.display = 'block';
-        email.focus();
+        signupPhase.style.display = 'block';
+        if (!isMobile) email.focus();
       }, 6000);
     };
     pausableTimeout(arrive, n * 1000);
@@ -870,7 +1183,7 @@
     if (!email.checkValidity || !email.checkValidity()) {
       if (!email.value.includes('@')) return;
     }
-    signup.style.display = 'none';
+    signupPhase.style.display = 'none';
     email.style.display = 'none';
     email.blur();
     stepsEl.style.display = 'block';
@@ -881,7 +1194,7 @@
   const aboutWord = document.querySelector('.word.about');
   const projectsWord = document.querySelector('.word.projects');
   const contactWord = document.querySelector('.word.contact');
-  const asan = document.querySelector('.asan');
+  const aboutPanel = document.getElementById('aboutPanel');
   const drive = document.querySelector('.drive');
   const pointnude = document.querySelector('.pointnude');
   const pointnudeShadow = document.querySelector('.pointnude-shadow');
@@ -898,18 +1211,68 @@
   const ecoDescWhite = document.querySelector('.eco-desc-white');
   const ecoSet = [eco, ecoText, ecoTextWhite, ecoDesc, ecoDescWhite];
   const showEcoSet = show => ecoSet.forEach(el => { el.style.display = show ? 'block' : 'none'; });
-  /* Vertically center the rendered eco art in the gap between the
-     bottom of the eco top text (top 143 + wrapped height) and the
-     top of the eco bottom text (732). Measured live so text edits
-     can't break it; art height derived from the image itself. */
-  const layoutEco = () => {
-    if (!eco.naturalWidth) return;
-    const s = Math.min(676 / eco.naturalWidth, 526 / eco.naturalHeight);
-    const artH = eco.naturalHeight * s;
-    const textBottom = 143 + ecoText.offsetHeight;
-    const artTop = textBottom + Math.max(0, (732 - textBottom - artH) / 2);
-    eco.style.top = (artTop - (526 - artH) / 2) + 'px';
+  /* Projects layout --------------------------------------------------------
+     The top text is anchored at y=143 and the description normally starts at
+     y=732. Text height is measured live because 'Microsoft Yi Baiti' only
+     ships with Windows: with any fallback font the copy wraps to more lines,
+     so the description is lifted until its last line stops 18 px above the
+     WalkingLine (882) and the artwork shrinks to the band that is left. */
+  const ART_W = 676, ART_H = 526, ART_GAP = 5;
+  const fitArtwork = (art, topText, bottomText, bottomTextWhite) => {
+    /* Keep the description at its usual top (732) when it fits; lift it
+       only when the font wraps it to more lines, so its last line can
+       never reach the WalkingLine (882 = 900 - 18). The white overlay
+       twin must move with it. Done before the art check so the text is
+       safe even if the artwork has not loaded yet. */
+    const descTop = Math.min(732, 882 - bottomText.offsetHeight) + 'px';
+    bottomText.style.top = descTop;
+    if (bottomTextWhite) bottomTextWhite.style.top = descTop;
+    if (!art.naturalWidth) return null;
+    const bandTop = 143 + topText.offsetHeight + ART_GAP;
+    const bandBottom = bottomText.offsetTop - ART_GAP;
+    const bandH = Math.max(48, bandBottom - bandTop);
+    const s = Math.min(ART_W / art.naturalWidth, Math.min(ART_H, bandH) / art.naturalHeight);
+    const w = art.naturalWidth * s;
+    const h = art.naturalHeight * s;
+    const left = 992 + (ART_W - w) / 2;
+    const top = bandTop + (bandH - h) / 2;
+    art.style.left = left + 'px';
+    art.style.top = top + 'px';
+    art.style.width = w + 'px';
+    art.style.height = h + 'px';
+    return { left, top, width: w, height: h };
   };
+  /* The nude dot is glued to the dot baked into the Drive artwork
+     (source centroid 510,161 of the 905x609 art) and scales with the
+     marker when the art has to shrink. Fed with the art's box either
+     way: the fitted box on desktop, the live flow box on mobile. */
+  const placeDriveDot = (left, top, width, height) => {
+    const k = width / ART_W;
+    const cx = left + 510 * (width / 905);
+    const cy = top + 161 * (height / 609);
+    const size = 34.6 * k;
+    pointnude.style.left = (cx - size / 2) + 'px';
+    pointnude.style.top = (cy - size / 2) + 'px';
+    pointnude.style.width = size + 'px';
+    pointnude.style.height = size + 'px';
+    pointnudeShadow.style.left = (cx - size / 2 + 3 * k) + 'px';
+    pointnudeShadow.style.top = (cy - size / 2 + 3 * k) + 'px';
+    pointnudeShadow.style.width = size + 'px';
+    pointnudeShadow.style.height = size + 'px';
+  };
+  const layoutDrive = () => {
+    const g = fitArtwork(drive, driveText, driveDesc, driveDescWhite);
+    if (!g) return;
+    placeDriveDot(g.left, g.top, g.width, g.height);
+  };
+  /* Mobile: the art is a plain full-width image in the flow, so its
+     live box is what the marker has to follow. */
+  const layoutDriveBox = () => {
+    const w = drive.offsetWidth;
+    if (!w) return;
+    placeDriveDot(drive.offsetLeft, drive.offsetTop, w, drive.offsetHeight);
+  };
+  const layoutEco = () => fitArtwork(eco, ecoText, ecoDesc, ecoDescWhite);
   /* Second projects view: ToRight hides Drive + its texts and
      shows Ecocivgreen; ToLeft restores Drive. Arrows stay put. */
   /* Projects pager: 0 = Drive, 1 = Ecociv, 2 = DeadCert.
@@ -933,14 +1296,9 @@
   const buildNames = () => {
     if (namesBuilt) return;
     namesBuilt = true;
-    const s = Math.min(676 / 1408, 526 / 768);
-    const bandTop = (526 - 768 * s) / 2 + 278 * s;
-    const pitch = (210 * s) / SEASONS.length;
-    SEASONS.forEach(([year, drivers], i) => {
+    SEASONS.forEach(([year, drivers]) => {
       const line = document.createElement('div');
       line.className = 'names-line';
-      line.style.top = (bandTop + i * pitch) + 'px';
-      line.style.lineHeight = pitch + 'px';
       const track = document.createElement('div');
       track.className = 'names-track';
       const unit = `${year} · ${drivers.replace(/, /g, ' · ')} · `;
@@ -949,14 +1307,33 @@
       namesMask.appendChild(line);
     });
   };
+  /* Re-applied whenever the DeadCert art is resized: the season lines
+     keep the same relative position inside the artwork (source rows
+     278-487 of the 1408x768 art), including font size, so they never
+     drift off the word mask. */
+  const layoutNames = () => {
+    const s = (namesMask.offsetWidth || ART_W) / 1408;
+    const bandTop = 278 * s;
+    const pitch = (210 * s) / SEASONS.length;
+    namesMask.querySelectorAll('.names-line').forEach((line, i) => {
+      line.style.top = (bandTop + i * pitch) + 'px';
+      line.style.lineHeight = pitch + 'px';
+      line.style.fontSize = (8 * (s / 0.48)) + 'px';
+    });
+  };
   const rollNameSpeeds = () => {
+    /* Crossing distance in the mask's own width (676 on desktop, the
+       full column width on the mobile layout). */
+    const maskWidth = namesMask.offsetWidth || 676;
     namesMask.querySelectorAll('.names-track').forEach(track => {
-      /* Single crossing: from offscreen-right (676) to fully
+      /* Single crossing: from offscreen-right (the mask width) to fully
          offscreen-left (-width), at a random 10-60 px/s. */
-      const dist = 676 + track.scrollWidth;
+      const dist = maskWidth + track.scrollWidth;
       const speed = 10 + Math.random() * 50;
       const dur = dist / speed;
       track.style.animationDuration = dur + 's';
+      /* Start just off the mask's right edge (676 px on desktop). */
+      track.style.setProperty('--names-start', maskWidth + 'px');
       /* Positive delay with backwards fill: every line waits
          offscreen-right (mask empty at first), then trickles in.
          Capped at 2 s so the first lines appear promptly even at
@@ -964,33 +1341,51 @@
       track.style.animationDelay = (Math.random() * 2) + 's';
     });
   };
-  /* Vertically center the rendered deadcert art (+mask, same box)
-     in the gap between the bottom of the deadcert top text
-     (top 143 + wrapped height) and the top of the deadcert
-     bottom text (732). Measured live so text edits can't break it. */
+  /* DeadCert art and its word mask share the same fitted box, so the
+     scrolling lines always line up with the baked-in word shapes. */
+  const placeNamesMask = (left, top, width, height) => {
+    namesMask.style.left = left + 'px';
+    namesMask.style.top = top + 'px';
+    namesMask.style.width = width + 'px';
+    namesMask.style.height = height + 'px';
+    layoutNames();
+  };
   const layoutDeadcert = () => {
-    if (!deadcertArt.naturalWidth) return;
-    const s = Math.min(676 / deadcertArt.naturalWidth, 526 / deadcertArt.naturalHeight);
-    const artH = deadcertArt.naturalHeight * s;
-    const textBottom = 143 + deadcertText.offsetHeight;
-    const artTop = textBottom + Math.max(0, (732 - textBottom - artH) / 2);
-    const boxTop = artTop - (526 - artH) / 2;
-    deadcertArt.style.top = boxTop + 'px';
-    namesMask.style.top = boxTop + 'px';
+    const g = fitArtwork(deadcertArt, deadcertText, deadcertDesc, deadcertDescWhite);
+    if (!g) return;
+    placeNamesMask(g.left, g.top, g.width, g.height);
+  };
+  /* Mobile: the mask rides on the art's live flow box instead. */
+  const layoutDeadcertBox = () => {
+    const w = deadcertArt.offsetWidth;
+    if (!w) return;
+    placeNamesMask(deadcertArt.offsetLeft, deadcertArt.offsetTop,
+                   w, deadcertArt.offsetHeight);
+  };
+  const layoutProjects = () => {
+    if (!projectsWord.classList.contains('active')) return;
+    if (isMobile) {
+      /* Panels are stacked in the document flow here; only the overlays
+         that ride on top of an artwork (dot, name mask) need measuring. */
+      if (viewIndex === 0) layoutDriveBox();
+      else if (viewIndex === 2) layoutDeadcertBox();
+      return;
+    }
+    if (viewIndex === 0) layoutDrive();
+    else if (viewIndex === 1) layoutEco();
+    else if (viewIndex === 2) layoutDeadcert();
   };
   const showView = i => {
     viewIndex = i;
     showDriveSet(i === 0);
     showEcoSet(i === 1);
-    if (i === 2) {
-      showDeadcertSet(true);
-      buildNames();
-      rollNameSpeeds();
-      layoutDeadcert();
-    } else {
-      showDeadcertSet(false);
-    }
-    if (i === 1) layoutEco();
+    showDeadcertSet(i === 2);
+    if (i === 2) buildNames();
+    layoutProjects();
+    layoutBar();
+    /* Durations are measured from the track widths, so roll them after
+       the art (and therefore the season-line font) has been fitted. */
+    if (i === 2) rollNameSpeeds();
   };
   toright.addEventListener('click', () => {
     if (!projectsWord.classList.contains('active')) return;
@@ -1000,12 +1395,99 @@
     if (!projectsWord.classList.contains('active')) return;
     showView((viewIndex + 2) % 3);
   });
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(() => {
-      if (viewIndex === 1) layoutEco();
-      else if (viewIndex === 2) layoutDeadcert();
+  /* The quote is right-aligned and scaled on X to end at the WalkingLine's
+     right edge (1813), 5 px right of the CONTACT word. The tuned 0.5964 in
+     CSS assumes 'Microsoft Yi Baiti'; a fallback font (macOS, Linux, mobile)
+     is wider, so measure the line and only ever shrink the scale — the
+     Windows look stays exactly as designed, other fonts stay inside the
+     966 px ink zone instead of running over CONTACT or off the stage.
+     The line box is also lifted so descenders stop 5 px above the line
+     top (895) instead of touching the old fixed y=871 ink position. */
+  const QUOTE_CSS_TRANSFORM = getComputedStyle(quoteEl).transform;
+  const QUOTE_SCALE = QUOTE_CSS_TRANSFORM && QUOTE_CSS_TRANSFORM !== 'none'
+    ? new DOMMatrixReadOnly(QUOTE_CSS_TRANSFORM).a : 0.5964;
+  const fitQuote = () => {
+    /* The mobile column is plain flow text: no scaling, no right pin. */
+    if (isMobile) return;
+    if (!quoteEl.offsetParent) return;
+    const stageRect = stage.getBoundingClientRect();
+    [quoteEl, quoteWhite].forEach(el => {
+      if (!el.offsetParent) return;
+      /* Hug the text and pin its right edge to the WalkingLine's right
+         bound (1813): text-align:right alone cannot right-align a line
+         that is wider than its 1699 px box. */
+      el.style.left = 'auto';
+      el.style.right = (1920 - 1813) + 'px';
+      el.style.width = 'max-content';
+      const textW = el.scrollWidth || 1;
+      el.style.transform = `scaleX(${Math.min(QUOTE_SCALE, 966 / textW)})`;
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const bottom = (range.getBoundingClientRect().bottom - stageRect.top) / stageScale;
+      el.style.top = (el.offsetTop + (895 - bottom)) + 'px';
     });
+  };
+  /* ── Layout orchestration ────────────────────────────────────────
+     Every desktop position below is written inline by fitArtwork(),
+     layoutDrive(), placeNamesMask() and fitQuote(), so switching to the
+     mobile column (or back) has to clear those first — otherwise the
+     flow layout would inherit stale 1920-canvas coordinates. */
+  const clearGeometry = () => {
+    [drive, eco, deadcertArt, namesMask,
+     pointnude, pointnudeShadow,
+     driveText, driveTextWhite, driveDesc, driveDescWhite,
+     ecoText, ecoTextWhite, ecoDesc, ecoDescWhite,
+     deadcertText, deadcertTextWhite, deadcertDesc, deadcertDescWhite
+    ].forEach(el => {
+      el.style.left = '';
+      el.style.top = '';
+      el.style.width = '';
+      el.style.height = '';
+    });
+    [quoteEl, quoteWhite].forEach(el => {
+      el.style.left = '';
+      el.style.right = '';
+      el.style.width = '';
+      el.style.top = '';
+      el.style.transform = '';
+    });
+  };
+  /* The WalkingLine is a flow item on mobile, so Rudy, the clock and the
+     input fields have to be placed from its live box; on desktop they
+     keep their CSS coordinates and only the patrol bounds are refreshed. */
+  const layoutBar = () => {
+    updatePatrolBounds();
+    pos = Math.min(Math.max(pos, LEFT_TX), RIGHT_TX);
+    render();
+    if (!isMobile) {
+      sprite.style.top = '';
+      [guess, email, result].forEach(el => { el.style.top = ''; });
+      return;
+    }
+    const top = walkingLine.offsetTop;
+    const h = walkingLine.offsetHeight;
+    /* Same relationship as the desktop CSS (sprite top 897 on a line
+       from 900 to 1014), but resolved for the scaled-down sprite. */
+    sprite.style.top = (top + h - 5 - 64 - 48 * spriteK()) + 'px';
+    const mid = top + h / 2;
+    [guess, email, result].forEach(el => { el.style.top = mid + 'px'; });
+  };
+  const relayout = () => {
+    fitStage();
+    clearGeometry();
+    layoutProjects();
+    layoutBar();
+    fitQuote();
+  };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(relayout);
   }
+  /* Font fallbacks / late image loads change text height, a resize can
+     change the stage scale, and crossing 900 px swaps the whole layout. */
+  window.addEventListener('resize', relayout);
+  if (MOBILE_QUERY.addEventListener) MOBILE_QUERY.addEventListener('change', relayout);
+  [drive, eco, deadcertArt].forEach(img => img.addEventListener('load', relayout));
+  relayout();
   const driveSet = [drive, pointnude, pointnudeShadow, driveText, driveTextWhite, driveDesc, driveDescWhite];
   const showDriveSet = show => driveSet.forEach(el => { el.style.display = show ? 'block' : 'none'; });
   const links = document.querySelector('.links');
@@ -1014,7 +1496,7 @@
       const wasActive = word.classList.contains('active');
       words.forEach(w => w.classList.remove('active'));
       if (!wasActive) word.classList.add('active');
-      asan.style.display = aboutWord.classList.contains('active') ? 'block' : 'none';
+      aboutPanel.style.display = aboutWord.classList.contains('active') ? 'block' : 'none';
       drive.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
       pointnude.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
       pointnudeShadow.style.display = projectsWord.classList.contains('active') ? 'block' : 'none';
@@ -1031,8 +1513,34 @@
       quoteEl.style.display = contactWord.classList.contains('active') ? 'block' : 'none';
       quoteWhite.style.display = contactWord.classList.contains('active') ? 'block' : 'none';
       links.style.display = contactWord.classList.contains('active') ? 'flex' : 'none';
+      /* Re-measure now that the panels are visible: the artwork band
+         depends on the wrapped text height and the quote's ink width
+         depends on the actual font. */
+      if (projectsWord.classList.contains('active')) layoutProjects();
+      if (contactWord.classList.contains('active')) fitQuote();
+      /* The panel changes the height of the column, and the walking bar
+         sits below it: re-anchor Rudy and the fields. */
+      layoutBar();
+      /* On a phone the panel opens below three word buttons, so bring
+         it into view rather than leaving the visitor on the buttons. */
+      if (isMobile && !wasActive) scrollPanelIntoView();
     });
   });
+  /* Scrolls to the top of the active panel, but only if it is not
+     already within the lower third of the screen. */
+  const scrollPanelIntoView = () => {
+    const panel = aboutWord.classList.contains('active') ? aboutPanel
+      : projectsWord.classList.contains('active')
+        ? (viewIndex === 0 ? driveText : viewIndex === 1 ? ecoText : deadcertText)
+        : contactWord.classList.contains('active') ? links : null;
+    if (!panel) return;
+    const top = panel.getBoundingClientRect().top;
+    if (top < window.innerHeight * 0.66) return;
+    window.scrollTo({
+      top: window.scrollY + top - 64,
+      behavior: 'smooth'
+    });
+  };
 </script>
 </body>
 </html>
