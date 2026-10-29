@@ -747,12 +747,12 @@
       position: static;
       width: 100%;
       height: auto;
-      /* Twice the artwork's natural height (1699x52) so the line reads
-         as a floor rather than a hairline; object-fit fills it. */
-      aspect-ratio: 1699 / 104;
+      /* Four times the artwork's natural height (1699x52) so the line
+         reads as a floor rather than a hairline; object-fit fills it. */
+      aspect-ratio: 1699 / 208;
       object-fit: fill;
       order: 6;
-      margin-top: 70px;         /* headroom for Rudy's body */
+      margin-top: 44px;         /* headroom for Rudy's body */
     }
     .sprite { top: 0; }         /* layoutBar() sets the real value */
 
@@ -1475,9 +1475,10 @@
     }
     const top = walkingLine.offsetTop;
     const h = walkingLine.offsetHeight;
-    /* Same relationship as the desktop CSS (sprite top 897 on a line
-       from 900 to 1014), but resolved for the scaled-down sprite. */
-    sprite.style.top = (top + h - 5 - 64 - 48 * spriteK()) + 'px';
+    /* Stand Rudy on the line's bottom edge. The spritesheet's lowest
+       drawn pixel is row 116 of the 128 px cell, and the cell scales
+       about its centre, so its position is T + 64 + (116 - 64) * k. */
+    sprite.style.top = (top + h - 64 - 52 * spriteK()) + 'px';
     const mid = top + h / 2;
     [guess, email, result].forEach(el => { el.style.top = mid + 'px'; });
   };
