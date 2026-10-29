@@ -730,16 +730,26 @@
     #aboutPanel { order: 3; margin-top: 18px; }
     .asan { display: none; }
     .asan-text { display: block; }
+    /* Same face, colours and justification as the desktop artwork
+       (Texts/Asan.webp): Handjet ExtraLight, white body, pink #d8a4a6,
+       green #c1d97c, drawn at the desktop panel's 0.95 opacity. */
     .asan-text p {
-      font-family: 'Microsoft Yi Baiti', sans-serif;
+      font-family: 'Handjet', monospace;
+      font-weight: 200;
       font-size: clamp(15px, 4.3vw, 18px);
       line-height: 1.5;
       letter-spacing: 0;
-      color: #e6dcd7;
+      text-align: justify;
+      text-justify: inter-word;
+      -webkit-hyphens: auto;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      opacity: 0.95;
+      color: #ffffff;
     }
     .asan-text strong { font-weight: 400; color: #ffffff; }
-    .hl-pink { color: #b0677c; }
-    .hl-green { color: #8b9c46; }
+    .hl-pink { color: #d8a4a6; }
+    .hl-green { color: #c1d97c; }
 
     /* Walking bar. The line is a full-width flow item; everything that
        rides on it (Rudy, the fields) is positioned by layoutBar(). */
@@ -782,7 +792,8 @@
     }
 
     /* Rudy's stepcounter: same LED face as the field, right-aligned and
-       tight under the line; the clock sits below it. */
+       tight under the line; the clock sits below it. Colour + outline
+       copied from the name text. */
     .steps {
       position: static;
       order: 7;
@@ -791,14 +802,17 @@
       font-family: 'Handjet', monospace;
       font-variation-settings: 'ELSH' 16;
       font-weight: 200;
-      font-size: calc(var(--line-h, 44px) * 0.5);
+      font-size: calc(var(--line-h, 44px) * 0.36);
       line-height: 1.2;
       letter-spacing: 1px;
       white-space: nowrap;
       text-align: right;
       transform: none;
-      color: #e6d3ca;
-      -webkit-text-stroke: 0;
+      color: rgba(96, 87, 80, 0.3);
+      /* Same fill/outline colours as the name text; the outline is
+         thinned to 0.6 px so it reads with the same weight at this
+         smaller size instead of filling the glyphs in. */
+      -webkit-text-stroke: 0.6px rgba(150, 136, 127, 0.9);
     }
 
     .clock {
