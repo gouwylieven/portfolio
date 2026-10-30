@@ -557,6 +557,13 @@
     caret-color: #d9a6a8;
   }
   .guess { display: none; }
+  /* An out-of-range submit flashes the field edge instead of failing
+     silently. box-shadow only, so the mobile translateY is untouched. */
+  @keyframes guess-reject {
+    0%, 100% { box-shadow: inset 0 0 0 2px rgba(217, 166, 168, 0); }
+    50%      { box-shadow: inset 0 0 0 2px rgba(217, 166, 168, 0.95); }
+  }
+  .guess.reject { animation: guess-reject 0.5s ease; }
   /* Final time shown with Congrats — same box/background idea as the
      time input, but wider (like the email field) so that e.g.
      "30.36 seconds" fits, still centered on the WalkingLine. */
@@ -986,7 +993,7 @@
       <img class="howmany" src="Texts/HowManySeconds.webp" alt="How many seconds do you think it will take Rudy to cross the screen">
       <p class="phase-text">How many seconds do you think it will take Rudy to cross the screen?</p>
     </div>
-    <input id="guess" class="guess" type="text" inputmode="numeric" maxlength="2" autocomplete="off" spellcheck="false" placeholder="30-90" aria-label="Your guess in seconds">
+    <input id="guess" class="guess" type="text" inputmode="numeric" enterkeyhint="go" maxlength="2" autocomplete="off" spellcheck="false" placeholder="30-90" aria-label="Your guess in seconds">
     <div id="guessCaret" class="caret" aria-hidden="true"></div>
     <div id="result" class="result" aria-live="polite"></div>
     <input id="email" class="email" type="email" name="no-autocomplete-email" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Email Address..." aria-label="Email address">
@@ -1255,23 +1262,40 @@
     syncCarets();
   }, 4000);
 
+  /* Digits only, 30-90. Every valid guess is exactly two digits, so the
+     second digit locks it in: that replaces the Enter key on phones,
+     whose digits keypad (inputmode="numeric") has no return key at all.
+     Out-of-range two-digit input is clamped back to one digit below, so
+     it can never auto-submit. */
   guess.addEventListener('input', () => {
     let v = guess.value.replace(/[^0-9]/g, '').slice(0, 2);
     const n = parseInt(v, 10);
     if (v.length === 1 && n < 3) v = '';
     else if (v.length === 2 && (n < 30 || n > 90)) v = v.slice(0, 1);
     guess.value = v;
+    guess.classList.remove('reject');
     syncCarets();
+    if (v.length === 2) submitGuess();
   });
 
-  guess.addEventListener('keydown', e => {
-    if (e.key !== 'Enter') return;
+  /* Locking in the guess. Called by the input handler above (auto-accept)
+     and by Enter, which still works on hardware and full keyboards. A
+     one-digit Enter flashes the field instead of failing silently. */
+  const submitGuess = () => {
     const n = parseInt(guess.value, 10);
-    if (!Number.isInteger(n) || n < 30 || n > 90) return;
+    if (!Number.isInteger(n) || n < 30 || n > 90) {
+      guess.classList.remove('reject');
+      void guess.offsetWidth;             /* restart the flash */
+      guess.classList.add('reject');
+      if (!isMobile) guess.focus();
+      return;
+    }
     guessedSeconds = n;
     howmanyPhase.style.display = 'none';
-    guess.style.display = 'none';
+    /* Blur before hiding: hiding a focused field on iOS leaves the page
+       scrolled where the keyboard was. */
     guess.blur();
+    guess.style.display = 'none';
     syncCarets();
     clock.classList.remove('hidden');
     sprite.classList.remove('paused');
@@ -1345,10 +1369,19 @@
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
+  };
+
+  guess.addEventListener('keydown', e => {
+    /* Old iOS reports some soft-keypad keys as 'Unidentified', so accept
+       the legacy keyCode as well as the modern key name. */
+    if (e.key !== 'Enter' && e.keyCode !== 13) return;
+    e.preventDefault();
+    submitGuess();
   });
+  guess.addEventListener('animationend', () => guess.classList.remove('reject'));
 
   email.addEventListener('keydown', e => {
-    if (e.key !== 'Enter') return;
+    if (e.key !== 'Enter' && e.keyCode !== 13) return;
     const address = email.value.trim();
     /* Native validity only: nothing over the network may gate the
        game, so a bad address just leaves the field up. */
